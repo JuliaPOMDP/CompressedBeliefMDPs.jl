@@ -12,7 +12,7 @@ Return a matrix of beliefs sampled from pomdp.
 """
 function sample end
 
-# TODO: try doing policy=RandomPolicy(pomdp)
+
 function sample(pomdp::POMDP, n_samples::Int=100, policy::Policy=RandomPolicy(pomdp), updater::Updater=DiscreteUpdater(pomdp))
     B = []
     while true
@@ -25,7 +25,7 @@ function sample(pomdp::POMDP, n_samples::Int=100, policy::Policy=RandomPolicy(po
     end
 end
 
-# TODO: can I use template type T to construct policy and updater? play around w/ this
+
 struct BaseSampler <: Sampler
     n_samples::Int
     policy::Policy

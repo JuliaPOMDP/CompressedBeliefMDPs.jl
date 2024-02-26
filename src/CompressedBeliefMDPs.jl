@@ -1,8 +1,5 @@
 module CompressedBeliefMDPs
 
-
-using Infiltrator
-
 export
     Compressor,
     fit!,
@@ -26,6 +23,6 @@ export
     CompressedBeliefMDP,
     encode,
     decode
-include("compressed_belief_mdp.jl")
+include("compressed_bmdp.jl")
 
 end # module CompressedBeliefMDPs
