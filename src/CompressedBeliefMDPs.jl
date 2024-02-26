@@ -23,7 +23,9 @@ export
 include("solver.jl")
 
 export
-    CompressedBeliefMDP
+    CompressedBeliefMDP,
+    encode,
+    decode
 include("compressed_belief_mdp.jl")
 
 end # module CompressedBeliefMDPs

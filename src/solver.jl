@@ -1,7 +1,7 @@
 using POMDPs
 
 using POMDPModelTools: GenerativeBeliefMDP
-using LocalFunctionApproximation
+using LocalFunctionApproximation: LocalFunctionApproximator
 using LocalApproximationValueIteration
 
 
@@ -13,7 +13,7 @@ struct CompressedSolver <: POMDPs.Solver
     updater::POMDPs.Updater
 end
 
-# TODO: perhaps the solve method isn't even needed!!
+
 function POMDPs.solve(solver::CompressedSolver, pomdp::POMDP)
     # sample beliefs to fit the compressor and approximator
     B = sample(solver.sampler, pomdp)

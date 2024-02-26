@@ -5,80 +5,52 @@ using POMDPTools: DiscreteBelief
 using Random: AbstractRNG
 using LinearAlgebra
 
-# TEMP
-using StaticArrays
-
 """
-    decode(m::CompressedBeliefMDP, b̃)
+    decode(m::POMDP, c::Compressor, b̃)
 
-Return the decoded belief with type statetype(m.bdmp).
+Return the decoded belief.
 """
 function decode end
 
 """
-    encode(m::CompressedBeliefMDP, b::AbstractArray)
+    encode(m::POMDP, c::Compressor, b)
 
 Return the encoded belief.
 """
 function encode end
 
 
-# TODO: perhaps change parameters to make less confusing since our state type is a vector and bmdp is a belief
 struct CompressedBeliefMDP{B, A} <: MDP{B, A}
     bmdp::GenerativeBeliefMDP
     compressor::Compressor
 end
 
+
 function CompressedBeliefMDP(pomdp::POMDP, updater::Updater, compressor::Compressor)
     # NOTE: hack to determine belief type
     bmdp = GenerativeBeliefMDP(pomdp, updater)
     b0 = initialize_belief(updater, initialstate(pomdp))
-    # TODO: make more general later w/ encode rather than compress or make more encode methods (probably have to use multiple dispatch here); something like encode(pomdp, compressor, )
-    # b̃0 = encode(pomdp, b0)
-    b̃0 = vec(compress(compressor, b0.b'))
+    b̃0 = encode(pomdp, compressor, b0)
     return CompressedBeliefMDP{typeof(b̃0), actiontype(bmdp)}(bmdp, compressor)
 end
 
+
 function POMDPs.gen(m::CompressedBeliefMDP, b̃::V, a, rng::AbstractRNG) where V<:AbstractArray
-    b = decode(m, b̃)
+    b = decode(m.bmdp.pomdp, m.compressor, b̃)
     bp, r = @gen(:sp, :r)(m.bmdp, b, a, rng)
-    b̃p = encode(m, bp)
+    b̃p = encode(m.bmdp.pomdp, m.compressor, bp)
     return (sp=b̃p, r=r)
 end
 
-POMDPs.actions(m::CompressedBeliefMDP, b̃) = actions(m.bmdp, decode(m, b̃))
+
+POMDPs.actions(m::CompressedBeliefMDP, b̃) = actions(m.bmdp, decode(m.bmdp.pomdp, m.compressor, b̃))
 POMDPs.actions(m::CompressedBeliefMDP) = actions(m.bmdp)
-POMDPs.isterminal(m::CompressedBeliefMDP, b̃) = isterminal(m.bmdp, decode(m, b̃))
+POMDPs.isterminal(m::CompressedBeliefMDP, b̃) = isterminal(m.bmdp, decode(m.bmdp.pomdp, m.compressor, b̃))
 POMDPs.discount(m::CompressedBeliefMDP{B, A}) where {B, A} = discount(m.bmdp)
-POMDPs.initialstate(m::CompressedBeliefMDP) = encode(m, initialstate(m.bmdp))
-# TODO: fix
-# POMDPs.actionindex(m::CompressedBeliefMDP, a) = actionindex(m.bmdp.pomdp)  # Why doesn't BabyPOMDP have an action index?
-POMDPs.actionindex(m::CompressedBeliefMDP, a) = 1
+POMDPs.initialstate(m::CompressedBeliefMDP) = encode(m.bmdp.pomdp, m.compressor, initialstate(m.bmdp))
+POMDPs.actionindex(m::CompressedBeliefMDP, a) = actionindex(m.bmdp.pomdp, a)
 
-########################
-# MOVE EVERYTHING BELOW HERE SOMEWHERE ELSE LATER
-########################
 
-# TODO: use parameterized types here
-function decode(m::CompressedBeliefMDP, b̃)
-    b = decompress(m.compressor, b̃)
-    b = normalize(b, 1)  # TODO: make sure they are all positive
-    return DiscreteBelief(m.bmdp.pomdp, vec(b))
-end
-
-# TODO: perhaps store belief type as parameter of the struct for more general decoding
-function encode(m::CompressedBeliefMDP, b::DiscreteBelief)
-    return vec(compress(m.compressor, b.b'))
-end
-
-# TODO: try to make more general
-# TODO: fix
-# function POMDPs.convert_s(::Type{V}, s, problem::CompressedBeliefMDP) where V<:Vector
-#     return [0.5, 0.5]
-# end
-
-# TODO: figure out how to make more general
-# TODO: fix
-# function POMDPs.convert_s(::Type{S}, vec::V, problem::CompressedBeliefMDP) where {S, V<:AbstractArray}
-#     return decode(problem, vec)
-# end
+# Convenience methods
+decode(m::POMDP, c::Compressor, b̃) = DiscreteBelief(m, vec(normalize(decompress(c, b̃), 1)))
+encode(m::POMDP, c::Compressor, b::DiscreteBelief) = vec(compress(c, b.b'))
