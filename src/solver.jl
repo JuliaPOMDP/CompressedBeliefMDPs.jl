@@ -27,7 +27,7 @@ function POMDPs.solve(solver::CompressedSolver, pomdp::POMDP)
     compressed_bmdp = CompressedBeliefPOMDPs(bmdp, solver.compressor)
 
     # solve the belief MDP with fitted value approximation
-    approx_solver = LocalApproximationValueIterationSolver(interp, verbose=true, max_iterations=1000, is_mdp_generative=true)
+    approx_solver = LocalApproximationValueIterationSolver(interp, verbose=true, max_iterations=1000, is_mdp_generative=true, n_generative_samples=10)
     approx_policy = solve(approx_solver, compressed_bmdp)
     # TODO: perhaps remap some stuff
     return return approx_policy
