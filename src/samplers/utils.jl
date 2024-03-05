@@ -1,9 +1,11 @@
 using POMDPs: POMDP, Policy, Updater
-using POMDPPolicies
+using POMDPPolicies: EpsGreedyPolicy, SoftmaxPolicy
 using POMDPTools: RandomPolicy, DiscreteUpdater
 using POMDPSimulators: stepthrough
+using Random
 
 
+# TODO: replace w/ take (get GPT to simplify this loop)
 function sample(pomdp::POMDP, n_samples::Integer; policy::Policy=RandomPolicy(pomdp), updater::Updater=DiscreteUpdater(pomdp))
     B = []
     while true
@@ -18,27 +20,26 @@ end
 
 
 struct BaseSampler <: Sampler
-    n_samples::Integer
     policy::Policy
     updater::Updater
 end
 
-sample(sampler::BaseSampler, pomdp::POMDP) = sample(pomdp, sampler.n_samples, sampler.policy, sampler.updater)
+sample(sampler::BaseSampler, pomdp::POMDP; n_samples::Integer=100) = sample(pomdp, n_samples; sampler.policy, sampler.updater)
+DiscreteSampler(pomdp::POMDP, policy::Policy) = BaseSampler(policy, DiscreteUpdater(pomdp))
 
-DiscreteSampler(pomdp::POMDP, n_samples::Integer, policy::Policy) = BaseSampler(n_samples, policy, DiscreteUpdater(pomdp))
-
-function DiscreteEpsGreedySampler(pomdp::POMDP, n_samples::Integer; eps::Function=k->0.05*0.9^(k/10), rng::AbstractRNG)
-    policy = EpsGreedyPolicy(pomdp, eps; actions=POMDPs.actions(pomdp), rng=rng)
-    return DiscreteSampler(pomdp, n_samples, policy)
+function DiscreteEpsGreedySampler(pomdp::POMDP, eps; rng::AbstractRNG=Random.GLOBAL_RNG)
+    policy = EpsGreedyPolicy(pomdp, eps; rng=rng)
+    return DiscreteSampler(pomdp, policy)
 end
 
-function DiscreteSoftmaxSampler(pomdp::POMDP, n_samples::Integer; temperature::Function=k->0.05*0.9^(k/10), rng::AbstractRNG)
-    policy = SoftmaxPolicy(pomdp, temperature; actions=POMDPs.actions(pomdp), rng=rng)
-    return DiscreteSampler(pomdp, n_samples, policy)
+# TODO: figure out a better default schedule
+function DiscreteSoftmaxSampler(pomdp::POMDP, temperature; rng::AbstractRNG=Random.GLOBAL_RNG)
+    policy = SoftmaxPolicy(pomdp, temperature; rng=rng)
+    return DiscreteSampler(pomdp, policy)
 end
 
-function DiscreteRandomSampler(pomdp::POMDP, n_samples::Integer; rng::AbstractRNG)
+function DiscreteRandomSampler(pomdp::POMDP; rng::AbstractRNG=Random.GLOBAL_RNG)
     updater = DiscreteUpdater(pomdp)
     policy = RandomPolicy(pomdp; rng=rng, updater=updater)
-    return BaseSampler(n_samples, policy, updater)
+    return BaseSampler(policy, updater)
 end

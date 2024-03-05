@@ -4,15 +4,20 @@ authors = ["Logan-Mondal-Bhamidipaty"]
 version = "1.0.0-DEV"
 
 [deps]
+Infiltrator = "5903a43b-9cc3-4c30-8d17-598619ec4e9b"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 LocalApproximationValueIteration = "a40420fb-f401-52da-a663-f502e5b95060"
 LocalFunctionApproximation = "db97f5ab-fc25-52dd-a8f9-02a257c35074"
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
+MultivariateStats = "6f286f6a-111f-5878-ab1e-185364afe411"
+NearestNeighbors = "b8a86587-4115-5ab1-83bc-aa920d37bbce"
 POMDPModelTools = "08074719-1b2a-587c-a292-00f91cc44415"
 POMDPPolicies = "182e52fb-cfd0-5e46-8c26-fd0667c990f4"
 POMDPSimulators = "e0d0a172-29c6-5d4e-96d0-f262df5d01fd"
 POMDPTools = "7588e00f-9cae-40de-98dc-e0c70c48cdd7"
 POMDPs = "a93abf59-7444-517b-a68a-c42f96afdd7d"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 julia = "1"

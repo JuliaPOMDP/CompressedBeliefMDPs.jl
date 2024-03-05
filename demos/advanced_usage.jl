@@ -14,8 +14,8 @@ pomdp = TigerPOMDP()
 # pomdp = RandomPOMDP()
 
 # sample beliefs
-sampler = DiscreteRandomSampler(pomdp, n_samples=20)
-B = sample(sampler, pomdp)
+sampler = DiscreteRandomSampler(pomdp)
+B = sample(sampler, pomdp; n_samples=20)
 
 # compress beliefs
 n_components = 1

@@ -1,11 +1,16 @@
 module CompressedBeliefMDPs
 
+using Infiltrator
+
+
 export
     Compressor,
     fit!,
     compress,
-    decompress
+    decompress,
+    PCA
 include("compressors/compressor.jl")
+include("compressors/pca.jl")
 
 export
     Sampler,

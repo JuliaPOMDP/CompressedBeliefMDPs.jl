@@ -1,37 +1,21 @@
 using CompressedBeliefMDPs
-using ExpFamilyPCA
 
 using POMDPModels
-using POMDPTools
 using POMDPs
 
-using NearestNeighbors, StaticArrays
-using LocalFunctionApproximation
-using LocalApproximationValueIteration
+using ExpFamilyPCA
 
-# pomdp = BabyPOMDP() 
+
+
 pomdp = TigerPOMDP()
+# sampler = DiscreteEpsGreedySampler(pomdp, k->0.05*0.9^(k/10))  # TODO: debug for other samplers
+sampler = DiscreteRandomSampler(pomdp)
+# compressor = PCA(2)
+compressor = PoissonPCA(1, length(states(pomdp)))
+# compressor = PoissonPCA(2, length(states(pomdp)))  # TODO: debug dimension errors
+solver = CompressedSolver(pomdp, sampler, compressor; n_samples=5)
+approx_policy = solve(solver, pomdp; verbose=true, max_iterations=10)
 
-# make sampler
-sampler = DiscreteRandomSampler(pomdp, n_samples=20)
-
-# make compressor
-n_components = 1
-n_states = length(states(pomdp))
-compressor = PoissonPCA(n_components, n_states)
-
-# make updater
-updater
-
-solver = CompressedSolver(pomdp, compressor; verbose=true, max_iterations=1000)
-
-
-# make solver
-solver = LocalApproximationValueIterationSolver(func_approx, verbose=true, max_iterations=1000, is_mdp_generative=true, n_generative_samples=10)
-
-# make compressed belief MDP
-updater = DiscreteUpdater(pomdp)
-mdp = CompressedBeliefMDP(pomdp, updater, compressor)
-
-# solve
-policy = solve(solver, mdp)
+s = initialstate(pomdp)
+# v = value(approx_policy, s)  # returns the approximately optimal value for state s
+a = action(approx_policy, s) # returns the approximately optimal action for state s
