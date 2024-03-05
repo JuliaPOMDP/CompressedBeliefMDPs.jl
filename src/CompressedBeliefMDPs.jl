@@ -5,14 +5,17 @@ export
     fit!,
     compress,
     decompress
-include("compressor.jl")
+include("compressors/compressor.jl")
 
 export
     Sampler,
-    BaseSampler,
+    sample,
+    DiscreteEpsGreedySampler,
+    DiscreteSoftmaxSampler,
     DiscreteRandomSampler,
     sample
-include("sampling.jl")
+include("samplers/sampler.jl")
+include("samplers/utils.jl")
 
 export
     CompressedSolver,
