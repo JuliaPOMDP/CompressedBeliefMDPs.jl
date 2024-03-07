@@ -45,16 +45,15 @@ POMDPs.actionindex(m::CompressedBeliefMDP, a) = actionindex(m.bmdp.pomdp, a)
 POMDPs.states(m::CompressedBeliefMDP) = states(m.bmdp.pomdp)  # GenerativeBeliefMDP doesn't implement states(...), so we bypass it.
 
 # Convenience methods
-# TODO: replace w/ general purpose encode that uses convert_s
-# encode(m::POMDP, c::Compressor, b::DiscreteBelief) = vec(compress(c, b.b'))
+process(x) = normalize(abs.(x), 1)
 
 function decode(m::POMDP, c::Compressor, b̃; postprocessing=false)
-    b = decompress(c, b̃)
+    b = decompress(c, b̃')
     if postprocessing
-        b = normalize(abs.(b), 1)
+        b = process(x)
     end
     b0 = initialstate(m)
-    b = convert_s(typeof(b0), vec(b), m)
+    b = convert_s(typeof(b0), vec(b), m)  # TODO: remove processing from convert_s methods
     return b
 end
 
@@ -65,30 +64,24 @@ function encode(m::POMDP, c::Compressor, b)
 end
 
 # TODO clean up
-function POMDPs.convert_s(T::Type{<:AbstractArray}, s::StaticArray, pomdp::CompressedBeliefMDP)
+function POMDPs.convert_s(T::Type{<:AbstractArray}, s::StaticArray, pomdp::POMDP)
     return convert_s(T, s, pomdp.bmdp.pomdp)
 end
 
-# TODO: consolidate w/ SparseCat
-function POMDPs.convert_s(T::Type{<:AbstractArray}, s::BoolDistribution, pomdp::CompressedBeliefMDP)
-    return [pdf(s, x) for x in (true, false)]
-end
-
-function POMDPs.convert_s(T::Type{<:AbstractArray}, s::DiscreteBelief, pomdp::POMDP)
+function POMDPs.convert_s(::Type{<:AbstractArray}, s::DiscreteBelief, pomdp::POMDP)
     return s.b
 end
 
-
 # TODO: add support for all the implemented distributions in pomdps.jl by using a union type like Union{SparseCat, Uniform, ...} (https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/distributions/#Implemented-Distributions)
-function POMDPs.convert_s(T::Type{<:AbstractArray}, b::SparseCat, pomdp::POMDP)
+function POMDPs.convert_s(::Type{<:AbstractArray}, b::Union{SparseCat, BoolDistribution}, pomdp::POMDP)
     return [pdf(b, s) for s in states(pomdp)]
 end
 
-function POMDPs.convert_s(T::Type{<:SparseCat}, vec, pomdp::POMDP)
+function POMDPs.convert_s(::Type{<:SparseCat}, vec, pomdp::POMDP)
     @assert length(vec) == length(states(pomdp))
     values = []
     probabilities = []
-    for (s, p) in zip(states(pomdp), vec)
+    for (s, p) in zip(states(pomdp), process(vec))
         if p != 0
             push!(values, s)
             push!(probabilities, p)
@@ -97,3 +90,5 @@ function POMDPs.convert_s(T::Type{<:SparseCat}, vec, pomdp::POMDP)
     dist = SparseCat(values, probabilities)
     return dist
 end
+
+POMDPs.convert_s(::Type{<:BoolDistribution}, vec, pomdp::POMDP) = BoolDistribution(process(vec)[1])

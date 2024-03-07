@@ -9,12 +9,13 @@ using POMDPTools
 using ExpFamilyPCA
 
 
-pomdp = TMaze(20, 0.99)
+pomdp = TMaze(50, 0.99)
+# pomdp = TigerPOMDP()
 # sampler = DiscreteEpsGreedySampler(pomdp, k->0.05*0.9^(k/10))  # TODO: debug
 # sampler = DiscreteEpsGreedySampler(pomdp, 0.05)  # TODO: debug
 sampler = DiscreteRandomSampler(pomdp)
-# compressor = PCA(2)
-compressor = PoissonPCA(1, length(states(pomdp)))
+# compressor = PCA(2)  # TODO: debug
+# compressor = PoissonPCA(3, length(states(pomdp)))
 # compressor = PoissonPCA(2, length(states(pomdp)))  # TODO: debug dimension errors
 solver = CompressedSolver(pomdp, sampler, compressor; n_samples=5)
 approx_policy = solve(solver, pomdp; verbose=true, max_iterations=5)

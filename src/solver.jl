@@ -16,7 +16,6 @@ struct CompressedSolverPolicy <: Policy
     base_policy::LocalApproximationValueIterationPolicy
 end
 
-
 function POMDPs.action(p::CompressedSolverPolicy, b)
     b̃ = encode(p.base_policy.mdp.bmdp.pomdp, p.compressor, b)
     return action(p.base_policy, b̃)
@@ -24,10 +23,8 @@ end
 
 function POMDPs.value(p::CompressedSolverPolicy, b)
     b̃ = encode(p.base_policy.mdp.bmdp.pomdp, p.compressor, b)
-    # return value(p.base_policy, vec(b̃))
     return value(p.base_policy, b̃)
 end
-
 
 function CompressedSolver(pomdp::POMDP, sampler::Sampler, compressor::Compressor; n_samples::Integer=100, k::Integer=1)
     # sample and compress beliefs
@@ -42,7 +39,6 @@ function CompressedSolver(pomdp::POMDP, sampler::Sampler, compressor::Compressor
 
     return CompressedSolver(sampler, compressor, approximator, DiscreteUpdater(pomdp))
 end
-
 
 function POMDPs.solve(solver::CompressedSolver, pomdp::POMDP; verbose=false, max_iterations=1000)   
     mdp = CompressedBeliefMDP(pomdp, solver.updater, solver.compressor)
