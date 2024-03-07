@@ -1,10 +1,3 @@
-using POMDPs: POMDP, Policy, Updater
-using POMDPPolicies: EpsGreedyPolicy, SoftmaxPolicy
-using POMDPTools: RandomPolicy, DiscreteUpdater
-using POMDPSimulators: stepthrough
-using Random
-
-
 # TODO: replace w/ take (get GPT to simplify this loop)
 function sample(pomdp::POMDP, n_samples::Integer; policy::Policy=RandomPolicy(pomdp), updater::Updater=DiscreteUpdater(pomdp))
     B = []

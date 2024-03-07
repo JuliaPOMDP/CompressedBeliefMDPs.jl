@@ -1,10 +1,3 @@
-using POMDPs
-using POMDPModelTools: GenerativeBeliefMDP
-using POMDPTools: DiscreteBelief
-
-using Random: AbstractRNG
-using LinearAlgebra
-
 """
     decode(m::POMDP, c::Compressor, b̃)
 
@@ -25,50 +18,82 @@ struct CompressedBeliefMDP{B, A} <: MDP{B, A}
     compressor::Compressor
 end
 
-# TODO: replace encode/decode w/ convert_s (not sure if they actually coincide; convert_s may be more useful)
-POMDPs.convert_s(::Type{<:AbstractArray}, b::DiscreteBelief, m::GenerativeBeliefMDP) = b.b
-POMDPs.convert_s(::Type{DiscreteBelief}, v::AbstractArray, m::GenerativeBeliefMDP) = DiscreteBelief(m, v)
-
-# Convenience methods
-decode(m::POMDP, c::Compressor, b̃) = DiscreteBelief(m, vec(normalize(decompress(c, b̃), 1)))
-encode(m::POMDP, c::Compressor, b::DiscreteBelief) = vec(compress(c, b.b'))
-
+# TODO: fix?
 function CompressedBeliefMDP(pomdp::POMDP, updater::Updater, compressor::Compressor)
     # NOTE: hack to determine belief type
     bmdp = GenerativeBeliefMDP(pomdp, updater)
-    b0 = initialize_belief(updater, initialstate(pomdp))
-    @infiltrate
-    b̃0 = encode(pomdp, compressor, b0)
-    return CompressedBeliefMDP{typeof(b̃0), actiontype(bmdp)}(bmdp, compressor)
+    # b0 = initialize_belief(updater, initialstate(pomdp))
+    # b̃0 = encode(pomdp, compressor, b0)
+    # # return CompressedBeliefMDP{typeof(b̃0), actiontype(bmdp)}(bmdp, compressor)
+    return CompressedBeliefMDP{Vector{Float64}, actiontype(bmdp)}(bmdp, compressor)
 end
 
 
-function POMDPs.gen(m::CompressedBeliefMDP, b̃::V, a, rng::AbstractRNG) where V<:AbstractArray
-    b = decode(m.bmdp.pomdp, m.compressor, b̃)
+function POMDPs.gen(m::CompressedBeliefMDP, b̃::V, a, rng::Random.AbstractRNG) where V<:AbstractArray
+    b = decode(m.bmdp.pomdp, m.compressor, b̃)  # convert compressed vector into belief
     bp, r = @gen(:sp, :r)(m.bmdp, b, a, rng)
-    b̃p = encode(m.bmdp.pomdp, m.compressor, bp)
+    b̃p = encode(m.bmdp.pomdp, m.compressor, bp)  # convert belief into compressed vector
     return (sp=b̃p, r=r)
 end
 
-# TODO: perhaps decode and encode can be replaced w/ convert_s
 POMDPs.actions(m::CompressedBeliefMDP, b̃) = actions(m.bmdp, decode(m.bmdp.pomdp, m.compressor, b̃))
 POMDPs.actions(m::CompressedBeliefMDP) = actions(m.bmdp)
 POMDPs.isterminal(m::CompressedBeliefMDP, b̃) = isterminal(m.bmdp, decode(m.bmdp.pomdp, m.compressor, b̃))
-POMDPs.discount(m::CompressedBeliefMDP{B, A}) where {B, A} = discount(m.bmdp)
+POMDPs.discount(m::CompressedBeliefMDP) = discount(m.bmdp)
 POMDPs.initialstate(m::CompressedBeliefMDP) = encode(m.bmdp.pomdp, m.compressor, initialstate(m.bmdp))
 POMDPs.actionindex(m::CompressedBeliefMDP, a) = actionindex(m.bmdp.pomdp, a)
+POMDPs.states(m::CompressedBeliefMDP) = states(m.bmdp.pomdp)  # GenerativeBeliefMDP doesn't implement states(...), so we bypass it.
 
-# NOTE: convert_s required for LocalApproximationValueIteration.jl
-# convert_s(::Type{V}, s, problem::CompressedBeliefMDP) where V<:AbstractArray
-# convert_s(::Type{S}, vec::V, problem::CompressedBeliefMDP) where {S,V<:AbstractArray}
-# function POMDPs.convert_s(::Type{<:AbstractArray}, s, ::CompressedBeliefMDP)
-#     @infiltrate
-#     return [1, 2]
-# end
+# Convenience methods
+# TODO: replace w/ general purpose encode that uses convert_s
+# encode(m::POMDP, c::Compressor, b::DiscreteBelief) = vec(compress(c, b.b'))
 
-# function POMDPs.convert_s(::Type{DiscreteBelief}, vec::AbstractArray, ::CompressedBeliefMDP)
-#     @infiltrate
-#     return [1, 2]
-# end
+function decode(m::POMDP, c::Compressor, b̃; postprocessing=false)
+    b = decompress(c, b̃)
+    if postprocessing
+        b = normalize(abs.(b), 1)
+    end
+    b0 = initialstate(m)
+    b = convert_s(typeof(b0), vec(b), m)
+    return b
+end
+
+function encode(m::POMDP, c::Compressor, b)
+    b = convert_s(Vector, b, m)
+    b̃ = compress(c, b')
+    return vec(b̃)
+end
+
+# TODO clean up
+function POMDPs.convert_s(T::Type{<:AbstractArray}, s::StaticArray, pomdp::CompressedBeliefMDP)
+    return convert_s(T, s, pomdp.bmdp.pomdp)
+end
+
+# TODO: consolidate w/ SparseCat
+function POMDPs.convert_s(T::Type{<:AbstractArray}, s::BoolDistribution, pomdp::CompressedBeliefMDP)
+    return [pdf(s, x) for x in (true, false)]
+end
+
+function POMDPs.convert_s(T::Type{<:AbstractArray}, s::DiscreteBelief, pomdp::POMDP)
+    return s.b
+end
 
 
+# TODO: add support for all the implemented distributions in pomdps.jl by using a union type like Union{SparseCat, Uniform, ...} (https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/distributions/#Implemented-Distributions)
+function POMDPs.convert_s(T::Type{<:AbstractArray}, b::SparseCat, pomdp::POMDP)
+    return [pdf(b, s) for s in states(pomdp)]
+end
+
+function POMDPs.convert_s(T::Type{<:SparseCat}, vec, pomdp::POMDP)
+    @assert length(vec) == length(states(pomdp))
+    values = []
+    probabilities = []
+    for (s, p) in zip(states(pomdp), vec)
+        if p != 0
+            push!(values, s)
+            push!(probabilities, p)
+        end
+    end
+    dist = SparseCat(values, probabilities)
+    return dist
+end

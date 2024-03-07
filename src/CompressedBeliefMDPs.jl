@@ -2,6 +2,12 @@ module CompressedBeliefMDPs
 
 using Infiltrator
 
+using POMDPs
+using POMDPTools
+
+using LinearAlgebra
+using Random
+
 
 export
     Compressor,

@@ -1,5 +1,3 @@
-using POMDPs
-using POMDPTools: DiscreteBelief
 import MultivariateStats
 
 # TODO: ask Mykel if there's a better way to do this
@@ -18,4 +16,4 @@ compress(compressor::PCA, beliefs) = MultivariateStats.predict(compressor.M, bel
 decompress(compressor::PCA, compressed) = MultivariateStats.reconstruct(compressor.M, compressed)
 
 # TODO: replace this w/ a generic normalization pipeline when there are negative values
-decode(m::POMDP, c::PCA, b̃) = DiscreteBelief(m, vec(normalize(abs.(decompress(c, b̃')), 1)))
+# decode(m::POMDP, c::PCA, b̃) = DiscreteBelief(m, vec(normalize(abs.(decompress(c, b̃')), 1)))
