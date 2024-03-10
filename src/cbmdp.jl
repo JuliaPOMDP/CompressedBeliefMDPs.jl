@@ -7,7 +7,7 @@ struct CompressedBeliefMDP{B, A} <: MDP{B, A}
 end
 
 struct CompressedBeliefMDPState
-    b̃::Vector
+    b̃::AbstractArray{<:Real}
 end
 
 function CompressedBeliefMDP(pomdp::POMDP, updater::Updater, compressor::Compressor)
@@ -23,9 +23,9 @@ function decode(m::CompressedBeliefMDP, s::CompressedBeliefMDPState)
 end
 
 function encode(m::CompressedBeliefMDP, b)
-    b = convert_s(Vector, b, m.bmdp.pomdp)
+    b = convert_s(AbstractArray, b, m.bmdp.pomdp)
     b̃ = compress(m.compressor, b)
-    s = convert_s(CompressedBeliefMDPState, b̃, m)
+    s = CompressedBeliefMDPState(b̃)
     return s
 end
 
@@ -44,8 +44,8 @@ POMDPs.initialstate(m::CompressedBeliefMDP) = encode(m, initialstate(m.bmdp))
 POMDPs.actionindex(m::CompressedBeliefMDP, a) = actionindex(m.bmdp.pomdp, a)  # TODO: figure out if can just wrap m.bmdp
 
 POMDPs.convert_s(::Type{V}, s::CompressedBeliefMDPState, m::CompressedBeliefMDP) where V<:AbstractArray = convert_s(V, s.b̃, m)
-POMDPs.convert_s(::Type{CompressedBeliefMDPState}, v::Vector, m::CompressedBeliefMDP) = CompressedBeliefMDPState(v)
-POMDPs.convert_s(::Type{CompressedBeliefMDPState}, v, m::CompressedBeliefMDP) = CompressedBeliefMDPState(convert_s(Vector, v, m.bmdp.pomdp))
+POMDPs.convert_s(::Type{CompressedBeliefMDPState}, v::AbstractArray, m::CompressedBeliefMDP) = CompressedBeliefMDPState(v)
+# POMDPs.convert_s(::Type{CompressedBeliefMDPState}, v, m::CompressedBeliefMDP) = CompressedBeliefMDPState(convert_s(Vector, v, m.bmdp.pomdp))
 
 # convenience methods
 POMDPs.convert_s(::Type{<:AbstractArray}, s::DiscreteBelief, pomdp::POMDP) = s.b
