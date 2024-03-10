@@ -6,3 +6,5 @@ abstract type Sampler end
 Return a matrix of beliefs sampled from pomdp.
 """
 function sample end
+# TODO: include full signature for functions -- check if Julian
+

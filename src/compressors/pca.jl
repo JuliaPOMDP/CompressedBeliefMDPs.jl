@@ -16,11 +16,10 @@ end
 # decompress(compressor::PCA, compressed) = MultivariateStats.reconstruct(compressor.M, compressed)
 
 function compress(compressor::PCA, beliefs)
-    @infiltrate
     return MultivariateStats.predict(compressor.M, beliefs)
 end
 
 function decompress(compressor::PCA, compressed)
-    @infiltrate
+    # @infiltrate
     return MultivariateStats.reconstruct(compressor.M, compressed)
 end

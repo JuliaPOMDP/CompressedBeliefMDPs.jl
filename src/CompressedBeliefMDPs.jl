@@ -23,20 +23,17 @@ export
     sample,
     DiscreteEpsGreedySampler,
     DiscreteSoftmaxSampler,
-    DiscreteRandomSampler,
-    sample
+    DiscreteRandomSampler
 include("samplers/sampler.jl")
 include("samplers/utils.jl")
+
+export
+    CompressedBeliefMDP
+include("cbmdp.jl")
 
 export
     CompressedSolver,
     solve
 include("solver.jl")
-
-export
-    CompressedBeliefMDP,
-    encode,
-    decode
-include("compressed_bmdp.jl")
 
 end # module CompressedBeliefMDPs
