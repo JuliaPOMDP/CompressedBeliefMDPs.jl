@@ -15,12 +15,9 @@ function CompressedBeliefMDP(pomdp::POMDP, updater::Updater, compressor::Compres
     return CompressedBeliefMDP{CompressedBeliefMDPState, actiontype(bmdp)}(bmdp, compressor)
 end
 
-# convenience functions
-cook(x) = normalize(abs.(x), 1)  # make valid probability distribution
-
 function decode(m::CompressedBeliefMDP, s::CompressedBeliefMDPState)
     b = decompress(m.compressor, s.b̃)
-    b = cook(b)
+    b = normalize(abs.(b), 1)  # make valid probability distribution
     b = convert_s(statetype(m.bmdp), b, m.bmdp.pomdp)
     return b
 end
