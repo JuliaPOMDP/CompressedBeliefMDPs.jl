@@ -14,7 +14,7 @@ MV_STATS_COMPRESSORS = (
     PCACompressor,
     KernelPCACompressor,
     PPCACompressor,
-    FactorAnalysisCompressor
+    # FactorAnalysisCompressor
 )
 
 @testset "Compressor Tests" begin

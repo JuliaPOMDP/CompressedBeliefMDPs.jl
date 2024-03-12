@@ -20,7 +20,7 @@ export
     PCACompressor,
     KernelPCACompressor,
     PPCACompressor,
-    FactorAnalysisCompressor
+    # FactorAnalysisCompressor  # TODO: debug
 include("compressors/compressor.jl")
 include("compressors/mv_stats.jl")
 

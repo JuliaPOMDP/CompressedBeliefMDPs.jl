@@ -1,5 +1,5 @@
 """
-Base type for an MDP/POMDP belief compression
+Base type for an MDP/POMDP belief compression.
 """
 abstract type Compressor end
 

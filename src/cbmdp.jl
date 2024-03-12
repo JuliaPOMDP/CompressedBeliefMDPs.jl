@@ -1,19 +1,76 @@
 # TODO: add particle filters --> AbstractParticleBelief https://juliapomdp.github.io/ParticleFilters.jl/latest/beliefs/
 
 
+"""
+    struct CompressedBeliefMDP{B, A} <: MDP{B, A}
+
+A struct representing a Markov Decision Process (MDP) with compressed beliefs.
+
+# Fields
+- `bmdp::GenerativeBeliefMDP`: The underlying GenerativeBeliefMDP that defines the original MDP.
+- `compressor::Compressor`: The compressor used to compress beliefs in the MDP.
+
+## Type Parameters
+- `B`: Type of the belief space.
+- `A`: Type of the action space.
+
+## Example
+```julia
+pomdp = TigerPOMDP()
+updater = DiscreteUpdater(pomdp)
+compressor = PCACompressor(1)
+generative_mdp = GenerativeBeliefMDP(pomdp, updater)
+mdp = CompressedBeliefMDP(generative_mdp, compressor)
+```
+"""
 struct CompressedBeliefMDP{B, A} <: MDP{B, A}
     bmdp::GenerativeBeliefMDP
     compressor::Compressor
 end
 
+"""
+    struct CompressedBeliefMDPState
+
+A struct representing the state of a CompressedBeliefMDP.
+
+# Fields
+- `b̃::AbstractArray{<:Real}`: Compressed belief vector.
+"""
 struct CompressedBeliefMDPState
     b̃::AbstractArray{<:Real}
 end
 
+# TODO: merge docstring of constructor w/ docstring for the struct proper
+"""
+    CompressedBeliefMDP(pomdp::POMDP, updater::Updater, compressor::Compressor)
+
+Create a CompressedBeliefMDP based on a given POMDP, updater, and compressor.
+
+This function initializes a `GenerativeBeliefMDP` using the provided `pomdp` and `updater`.
+It then constructs a `CompressedBeliefMDP` with the specified `compressor`.
+
+# Arguments
+- `pomdp::POMDP`: The original partially observable Markov decision process (POMDP).
+- `updater::Updater`: The belief updater used in the GenerativeBeliefMDP.
+- `compressor::Compressor`: The compressor used to compress beliefs in the MDP.
+
+# Returns
+- `CompressedBeliefMDP{CompressedBeliefMDPState, actiontype(bmdp)}`: The compressed belief MDP.
+
+## Example
+```julia
+pomdp = MyPOMDP()  # replace with your specific POMDP type
+updater = MyUpdater()  # replace with your specific updater type
+compressor = MyCompressor()  # replace with your specific compressor type
+
+mdp = CompressedBeliefMDP(pomdp, updater, compressor)
+```
+"""
 function CompressedBeliefMDP(pomdp::POMDP, updater::Updater, compressor::Compressor)
     bmdp = GenerativeBeliefMDP(pomdp, updater)
     return CompressedBeliefMDP{CompressedBeliefMDPState, actiontype(bmdp)}(bmdp, compressor)
 end
+
 
 function decode(m::CompressedBeliefMDP, s::CompressedBeliefMDPState)
     b = decompress(m.compressor, s.b̃)
@@ -54,11 +111,6 @@ POMDPs.convert_s(::Type{CompressedBeliefMDPState}, v, m::CompressedBeliefMDP) = 
 # convenience methods
 POMDPs.convert_s(::Type{<:AbstractArray}, s::DiscreteBelief, pomdp::POMDP) = s.b
 POMDPs.convert_s(::Type{<:DiscreteBelief}, v, pomdp::POMDP) = DiscreteBelief(pomdp, vec(v))
-# function POMDPs.convert_s(::Type{<:DiscreteBelief}, v, pomdp::POMDP)
-#     @infiltrate
-#     return DiscreteBelief(pomdp, v)
-# end
-
 
 ExplicitDistribution = Union{SparseCat, BoolDistribution, Deterministic, Uniform}  # distributions w/ explicit PDF from POMDPs.jl (https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/distributions/#Implemented-Distributions)
 POMDPs.convert_s(::Type{<:AbstractArray}, b::ExplicitDistribution, pomdp::POMDP) = [pdf(b, s) for s in states(pomdp)]
