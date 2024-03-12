@@ -1,5 +1,5 @@
 ---
-title: 'Gala: A Python package for galactic dynamics'
+title: 'CompressedBeliefMDPs: A Julia Package for Solving Large POMDPs'
 tags:
   - Julia
   - decision making
@@ -22,7 +22,7 @@ authors:
     surname: Beethoven
     affiliation: 3
 affiliations:
- - name: Lyman Spitzer, Jr. Fellow, Princeton University, USA
+ - name: Stanford University
    index: 1
  - name: Institution Name, Country
    index: 2
@@ -39,15 +39,14 @@ aas-journal: Astrophysical Journal <- The name of the AAS journal.
 
 # Summary
 
-The forces on stars, galaxies, and dark matter under external gravitational
-fields lead to the dynamical evolution of structures in the universe. The orbits
-of these bodies are therefore key to understanding the formation, history, and
-future state of galaxies. The field of "galactic dynamics," which aims to model
-the gravitating components of galaxies to study their structure and evolution,
-is now well-established, commonly taught, and frequently used in astronomy.
-Aside from toy problems and demonstrations, the majority of problems require
-efficient numerical tools, many of which require the same base code (e.g., for
-performing numerical orbit integration).
+In sequential decision making and reinforcement learning (RL), it's common to frame
+problems as Markov decision processes (MDPs). A popular generalization of MDPs is the partially
+observed MDP (POMDP). While POMDPs are useful for describing a wide range of problems, the POMDPs
+we face in the real world often involve an unfathomably large state space, so we often have to
+rely on domain-specific knowledge to devise custom heuristics. One such heuristic is belief compression
+which is useful when an agent's belief over the state space is sparse, as is commonly the case in robot
+navigation tasks. Inspired by prior work exploring belief compression using an extension of PCA, we devise
+a simple interface for belief compression that is compatible with the widely used POMDPs.jl package.
 
 # Statement of need
 

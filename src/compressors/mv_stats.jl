@@ -22,7 +22,6 @@ decompress(compressor::MultivariateStatsCompressor, compressed) = MultivariateSt
 
 MultivariateStatsCompressor(maxoutdim::Integer, T) = MultivariateStatsCompressor{T}(maxoutdim, nothing)
 
-
 # PCA Compressors
 PCACompressor(maxoutdim::Integer) = MultivariateStatsCompressor(maxoutdim, PCA)
 KernelPCACompressor(maxoutdim::Integer) = MultivariateStatsCompressor(maxoutdim, KernelPCA)

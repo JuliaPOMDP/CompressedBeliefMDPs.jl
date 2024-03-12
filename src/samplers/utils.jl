@@ -26,6 +26,7 @@ function DiscreteEpsGreedySampler(pomdp::POMDP, eps; rng::AbstractRNG=Random.GLO
 end
 
 # TODO: figure out a better default schedule
+# TODO: replace this w/ custom eps greedy policy
 function DiscreteSoftmaxSampler(pomdp::POMDP, temperature; rng::AbstractRNG=Random.GLOBAL_RNG)
     policy = SoftmaxPolicy(pomdp, temperature; rng=rng)
     return DiscreteSampler(pomdp, policy)
