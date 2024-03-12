@@ -1,6 +1,9 @@
 using CompressedBeliefMDPs
 using Test
 
+using POMDPs
+using POMDPModels
+
 @testset "CompressedBeliefMDPs.jl" begin
-    # Write your tests here.
+    include("mv_stats_tests.jl")
 end

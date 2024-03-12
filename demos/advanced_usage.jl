@@ -1,5 +1,4 @@
 using CompressedBeliefMDPs
-using ExpFamilyPCA
 
 using POMDPModels
 using POMDPTools
@@ -9,9 +8,7 @@ using NearestNeighbors, StaticArrays
 using LocalFunctionApproximation
 using LocalApproximationValueIteration
 
-# pomdp = BabyPOMDP() 
 pomdp = TigerPOMDP()
-# pomdp = RandomPOMDP()
 
 # sample beliefs
 sampler = DiscreteRandomSampler(pomdp)
@@ -19,8 +16,7 @@ B = sample(sampler, pomdp; n_samples=20)
 
 # compress beliefs
 n_components = 1
-n_states = length(states(pomdp))
-compressor = PoissonPCA(n_components, n_states)
+compressor = PCA(n_components)
 fit!(compressor, B)
 B̃ = compress(compressor, B)
 

@@ -73,7 +73,7 @@ scientific explorations of forthcoming data releases from the *Gaia* mission
 
 # Mathematics
 
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
+Single dollars (\$) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
 
 Double dollars make self-standing equations:
 

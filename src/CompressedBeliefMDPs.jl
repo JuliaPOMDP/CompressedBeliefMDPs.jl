@@ -10,13 +10,19 @@ using Random
 
 
 export
+    # Compressor interface
     Compressor,
     fit!,
     compress,
     decompress,
-    PCA
+    # MultivariateStats Compressors
+    MultivariateStatsCompressor,
+    PCACompressor,
+    KernelPCACompressor,
+    PPCACompressor,
+    FactorAnalysisCompressor
 include("compressors/compressor.jl")
-include("compressors/pca.jl")
+include("compressors/mv_stats.jl")
 
 export
     Sampler,
@@ -28,11 +34,13 @@ include("samplers/sampler.jl")
 include("samplers/utils.jl")
 
 export
-    CompressedBeliefMDP
+    CompressedBeliefMDP,
+    CompressedBeliefMDPState
 include("cbmdp.jl")
 
 export
     CompressedSolver,
+    CompressedSolverPolicy
     solve
 include("solver.jl")
 
