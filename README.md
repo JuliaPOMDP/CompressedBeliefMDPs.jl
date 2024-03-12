@@ -34,11 +34,11 @@ a = action(policy, s)
 ```
 # Sampling
 
-Compression is handled by the `Sampler`{:.julia} abstract type.
+Compression is handled by the `Sampler` abstract type.
 
 # Compression
 
-Compression is handled by the `Compressor`{:.julia} abstract type.
+Compression is handled by the `Compressor` abstract type.
 
 ## [MultivariateStats.jl](https://juliapackages.com/p/multivariatestats) Wrappers
 
@@ -46,4 +46,4 @@ As a convenience, we provide several wrappers for compression schemes from Multi
 
 # Limitations
 
-`CompressedBeliefMDP`{:.julia} is built off [`GenerativeBeliefMDP`{:.julia}](https://juliapomdp.github.io/POMDPs.jl/stable/POMDPTools/model/#POMDPTools.ModelTools.GenerativeBeliefMDP) which means the reward returned is the reward for a _single state sampled from the belief_ rather than the expected cumulative discounted reward.
+`CompressedBeliefMDP` is built off [`GenerativeBeliefMDP`](https://juliapomdp.github.io/POMDPs.jl/stable/POMDPTools/model/#POMDPTools.ModelTools.GenerativeBeliefMDP) which means the reward returned is the reward for a _single state sampled from the belief_ rather than the expected cumulative discounted reward.
