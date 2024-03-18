@@ -5,6 +5,8 @@ using Infiltrator
 using POMDPs
 using POMDPTools
 
+import Lazy: @forward
+
 using LinearAlgebra
 using Random
 
@@ -27,8 +29,8 @@ include("compressors/mv_stats.jl")
 export
     Sampler,
     sample,
-    DiscreteEpsGreedySampler,
-    DiscreteSoftmaxSampler,
+    # DiscreteEpsGreedySampler,
+    # DiscreteSoftmaxSampler,
     DiscreteRandomSampler
 include("samplers/sampler.jl")
 include("samplers/utils.jl")

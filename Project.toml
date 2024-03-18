@@ -5,6 +5,7 @@ version = "1.0.0-DEV"
 
 [deps]
 Infiltrator = "5903a43b-9cc3-4c30-8d17-598619ec4e9b"
+Lazy = "50d2b5c4-7a5e-59d5-8109-a42b560f39c0"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 LocalApproximationValueIteration = "a40420fb-f401-52da-a663-f502e5b95060"
 LocalFunctionApproximation = "db97f5ab-fc25-52dd-a8f9-02a257c35074"

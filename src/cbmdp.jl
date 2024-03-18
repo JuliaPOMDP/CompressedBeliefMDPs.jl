@@ -93,6 +93,7 @@ function POMDPs.gen(m::CompressedBeliefMDP, s::CompressedBeliefMDPState, a, rng:
     return (sp=sp, r=r)
 end
 
+# TODO: use macro forwarding
 POMDPs.actions(m::CompressedBeliefMDP, s::CompressedBeliefMDPState) = actions(m.bmdp, decode(m, s))
 POMDPs.actions(m::CompressedBeliefMDP) = actions(m.bmdp)
 POMDPs.isterminal(m::CompressedBeliefMDP, s::CompressedBeliefMDPState) = isterminal(m.bmdp, decode(m, s))
