@@ -6,3 +6,5 @@ abstract type Sampler end
 Return a matrix of beliefs sampled from pomdp.
 """
 function sample end
+
+# TODO: rewrite this based on Mykel's email

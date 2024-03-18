@@ -1,5 +1,5 @@
 ---
-title: 'CompressedBeliefMDPs: A Julia Package for Solving Large POMDPs'
+title: 'CompressedBeliefMDPs: A Julia Package for Solving Large POMDPs with Belief Compression'
 tags:
   - POMDP
   - MDP
@@ -20,42 +20,42 @@ affiliations:
    index: 1
 date: 16 March 2024
 bibliography: paper.bib
-
-# Optional fields if submitting to a AAS journal too, see this blog post:
-# https://blog.joss.theoj.org/2018/12/a-new-collaboration-with-aas-publishing
-# aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
-# aas-journal: Astrophysical Journal <- The name of the AAS journal.
 ---
 
 # Summary
 
-CompressedBeliefMDPs.jl is a Julia package for solving large partially observable Markov decision processes (POMDPs). It's a part of the widely-used JuliaPOMDPs ecosystem and generalizes the belief compression model presented in @Roy.
+Partially observable Markov decision processes (POMDPs) are a common framework in reinforcement learning and decision making under uncertainty, with applications in medicine [@drugs], sustainability [@carbon], economics [@markets], aerospace [@planes], and more. Unfortunately, solving real-world POMDPs with traditional methods is often computationally intractable due to the "curse of dimensionality" [@AFDM]. One way of overcome the so-called "curse of dimensionality" is belief compression. By compressing the belief distribution (i.e., the probability that the POMDP solver is in any given state at a given time), we can focus computation on the relevant belief states and solve large POMDPs. Belief compression is particularly useful when a POMDP has many states, but uncertainty is concentrated or sparse [@Roy].
 
 # Statement of need
 
-POMDPs are a common framework in reinforcement learning and decision making under uncertainty, with applications across medicine, sustainability, finance, aerospace, and more. Unfortunately, solving real-world POMDPs is often computationally intractable since the complexity of traditional methods scales exponentially with the size of the state space. One method for tackling the so-called "curse of dimensionality" is belief compression. By compressing the belief distribution (i.e., the probability that the POMDP solver is in any given state at a given time), we can focus computation on the relevant belief states and solve large POMDPs. Belief compression is particularly useful when a POMDP has many states, but uncertainty is concentrated or sparse.
-
-CompressedBeliefMDPs.jl provides an interface that connects the JuliaPOMDPs ecosystem with the arsenal of dimensionality reduction techniques in the wider Julia community. In particular, it exports a `CompressedBeliefMDP` and `CompressedSolver` that generalize the methods in @Roy.
-
+CompressedBeliefMDPs.jl is a Julia package [@Julia] for solving large partially observable Markov decision processes (POMDPs). It's a part of the JuliaPOMDPs ecosystem [@POMDPs.jl] and generalizes the belief compression model presented in @Roy. In particular, it exports a `CompressedBeliefMDP` and `CompressedSolver` that generalize the methods in @Roy.
 
 # Example
 
 Using CompressedBeliefMDPs.jl is simple.
+
 ```julia
 using POMDPs
 using POMDPModels
 using CompressedBeliefMDPs
 
-pomdp = TigerPOMDP()
+pomdp = BabyPOMDP()
 sampler = DiscreteRandomSampler(pomdp)
 compressor = PCACompressor(2)
-solver = CompressedSolver(pomdp, sampler, compressor)
-policy = POMDPs.solve(solver, pomdp)
+approx_solver = CompressedSolver(pomdp, sampler, compressor)
+approx_policy = POMDPs.solve(approx_solver, pomdp)
 ```
+
+We see that that the compressed solver performs similarly with SARSOP [@SARSOP].
+
+<p align="center">
+  <img src="./images/baby_benchmark.svg" alt="Benchmark" title="Line chart comparing SARSOP vs compressed solver on the baby POMDP." style="display: block; margin-left: auto; margin-right: auto"/>
+</p>
+
 
 # ExpFamilyPCA.jl
 
-Another package 
+ExpFamilyPCA.jl is a forthcoming package that complements CompressedBeliefMDPs.jl. It implements not only the Poisson exponential family PCA in @Roy, but also the more general exponential family PCA from @EPCA.
 
 # Acknowledgements
 
