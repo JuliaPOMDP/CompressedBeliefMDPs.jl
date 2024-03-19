@@ -48,9 +48,7 @@ approx_solver = CompressedSolver(pomdp, sampler, compressor)
 approx_policy = POMDPs.solve(approx_solver, pomdp)
 ```
 
-We see that that the compressed solver performs similarly with SARSOP [@SARSOP].
-
-![benchmark](./images/baby_benchmark.svg)
+![We see that that the compressed solver performs similarly with SARSOP [@SARSOP].](./images/baby_benchmark.svg){height="20pt"}
 
 
 # ExpFamilyPCA.jl
