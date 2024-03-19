@@ -30,7 +30,7 @@ Partially observable Markov decision processes (POMDPs) are a common framework i
 
 CompressedBeliefMDPs.jl is a Julia package [@Julia] for solving large POMDPs in the JuliaPOMDPs ecosystem [@POMDPs.jl] with belief compression [@Roy]. CompressedBeliefMDPs.jl exports an interface that generalizes the belief compression algorithm presented in @Roy. In particular, while @Roy describe belief compression using Poisson exponential-family PCA, CompressedBeliefMDPs.jl supports arbitrary compression techniques and function approximators. This flexibility enables development and application of new, more powerful compression approaches as research in this area continues to evolve.
 
-As far as we are aware, no prior Julia or Python package implements POMDP belief compression; though there is a similar package in MATLAB [@epca-MATLAB].
+As far as we are aware, no prior Julia or Python package implements POMDP belief compression, though there is a similar package in MATLAB [@epca-MATLAB].
 
 # Example
 
@@ -48,7 +48,7 @@ approx_solver = CompressedSolver(pomdp, sampler, compressor)
 approx_policy = POMDPs.solve(approx_solver, pomdp)
 ```
 
-![We see that that the compressed solver performs similarly with SARSOP [@SARSOP].](./images/baby_benchmark.svg){height="20pt"}
+![We see that that the compressed solver performs similarly with SARSOP [@SARSOP].](./images/baby_benchmark.svg){height="100pt"}
 
 
 # ExpFamilyPCA.jl
