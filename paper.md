@@ -43,9 +43,9 @@ The belief compression algorithm in @Roy can be generalized into the following s
 4. create the compressed belief-state Markov decision process (MDP);
 5. and, solve the MDP with local approximation value iteration.
 
-For steps 1. and 2., CompressedBeliefMDPS.jl defines two abstract types `Sampler` and `Compressor`. For step 3., we use the `LocalFunctionApproximator` abstract type from [LocalApproximationValueIteration.jl](https://github.com/JuliaPOMDP/LocalApproximationValueIteration.jl). Note that we need function approximation because it gives us an error bound on the estimated value function: our estimate is no longer guaranteed to converge to the optimum since the value function is not necessarily convex over the compressed belief simplex. CompressedBeliefMDPs.jl defines several convenience subtypes which we describe later. 
+For steps 1. and 2., CompressedBeliefMDPS.jl defines two abstract types `Sampler` and `Compressor`. For step 3., we use the `LocalFunctionApproximator` abstract type from [LocalApproximationValueIteration.jl](https://github.com/JuliaPOMDP/LocalApproximationValueIteration.jl). Note that we need function approximation because it gives us an error bound on the estimated value function: our estimate is no longer guaranteed to converge to the optimum since the value function is not necessarily convex over the compressed belief simplex. As a convenience, CompressedBeliefMDPs.jl defines several concrete subtypes which we describe later. 
 
-For step 4., we define a new generative `POMDP` type called `CompressedBeliefMDP` that wraps [`GenerativeBeliefMDP`](https://juliapomdp.github.io/POMDPModelTools.jl/stable/model_transformations/#Generative-Belief-MDP). As an aside, in @Roy, the state space comprises the _approximate_ compressed belief states; CompressedBeliefMDPs.jl, on the other hand, delegates local approximation to the solver. This makes it easier to benchmark different solvers against the same compressed belief-state MDP. Finally, for step 5., we define `CompressedSolver <: POMDPs.Solver` that wraps the entire belief compression pipeline.
+For step 4., we define a new generative `POMDP` type called `CompressedBeliefMDP` that wraps [`GenerativeBeliefMDP`](https://juliapomdp.github.io/POMDPModelTools.jl/stable/model_transformations/#Generative-Belief-MDP). While @Roy builds the compressed belief-state MDP directly from the interpolated values, CompressedBeliefMDPs.jl delegates local approximation to the solver. This makes it easier to benchmark different approximators against the same compressed belief-state MDP. Finally, for step 5., we define `CompressedSolver <: POMDPs.Solver` that wraps the entire belief compression pipeline.
 
 # Example
 
@@ -65,7 +65,7 @@ v = value(approx_policy, s)
 a = action(approx_policy, s)
 ```
 
-![We see that that the compressed solver performs similarly with SARSOP [@SARSOP].](./images/baby_benchmark.svg){height="200pt"}
+![We see that that the compressed solver recovers a similar value function to SARSOP [@SARSOP].](./images/baby_benchmark.svg){height="200pt"}
 
 ## Function Approximators
 
@@ -73,7 +73,7 @@ CompressedBeliefMDPs.jl is compatible with any `LocalFunctionApproximator`. It s
 
 ## Compressors
 
-CompressedBeliefMDPs.jl provides several wrappers for commonly used compressors. Through [MultiVariateStats.jl](https://juliastats.org/MultivariateStats.jl/stable/), we include PCA [@PCA], kernel PCA [@kernelPCA], and probabilistic PCA [@PPCA]. Through a forthcoming package `ExpFamilyPCA.jl`, we also include exponential family PCA [@EPCA]. This is more general than the Poisson exponential family PCA in @Roy: ExpFamilyPCA.jl supports compression objective induced from _any_ convex function, not just the Poisson link function.
+CompressedBeliefMDPs.jl provides several wrappers for commonly used compressors. Through [MultiVariateStats.jl](https://juliastats.org/MultivariateStats.jl/stable/), we include PCA [@PCA], kernel PCA [@kernelPCA], and probabilistic PCA [@PPCA]. Through a forthcoming package `ExpFamilyPCA.jl`, we also include exponential family PCA [@EPCA]. This is more general than the Poisson exponential family PCA in @Roy: ExpFamilyPCA.jl supports compression objectives induced from _any_ convex function, not just the Poisson link function.
 
 # Acknowledgements
 
