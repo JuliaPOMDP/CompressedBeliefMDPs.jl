@@ -28,7 +28,7 @@ function POMDPs.value(p::CompressedSolverPolicy, b)
     return value(p.base_policy, s)
 end
 
-@forward CompressedSolverPolicy.base_policy POMDPs.updater
+POMDPs.updater(policy::CompressedSolverPolicy) = policy.m.bmdp.updater
 
 function CompressedSolver(
     pomdp::POMDP, 
