@@ -44,7 +44,3 @@ Compression is handled by the `Compressor` abstract type.
 ## [MultivariateStats.jl](https://juliapackages.com/p/multivariatestats) Wrappers
 
 As a convenience, we provide several wrappers for compression schemes from MultivariateStats.jl.
-
-# Limitations
-
-`CompressedBeliefMDP` is built off [`GenerativeBeliefMDP`](https://juliapomdp.github.io/POMDPs.jl/stable/POMDPTools/model/#POMDPTools.ModelTools.GenerativeBeliefMDP) which means the reward returned is the reward for a _single state sampled from the belief_ rather than the expected cumulative discounted reward.
