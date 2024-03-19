@@ -1,5 +1,5 @@
 ---
-title: 'CompressedBeliefMDPs: A Julia Package for Solving Large POMDPs with Belief Compression'
+title: 'CompressedBeliefMDPs.jl: A Julia Package for Solving Large POMDPs with Belief Compression'
 tags:
   - POMDP
   - MDP
@@ -48,7 +48,7 @@ approx_solver = CompressedSolver(pomdp, sampler, compressor)
 approx_policy = POMDPs.solve(approx_solver, pomdp)
 ```
 
-![We see that that the compressed solver performs similarly with SARSOP [@SARSOP].](./images/baby_benchmark.svg){height="100pt"}
+![We see that that the compressed solver performs similarly with SARSOP [@SARSOP].](./images/baby_benchmark.svg){height="200pt"}
 
 
 # ExpFamilyPCA.jl
