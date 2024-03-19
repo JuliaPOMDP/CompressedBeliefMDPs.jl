@@ -37,8 +37,7 @@ As far as we are aware, no prior Julia or Python package implements POMDP belief
 Using CompressedBeliefMDPs.jl is simple.
 
 ```julia
-using POMDPs
-using POMDPModels
+using POMDPs, POMDPModels
 using CompressedBeliefMDPs
 
 pomdp = BabyPOMDP()

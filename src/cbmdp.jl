@@ -113,22 +113,22 @@ POMDPs.convert_s(::Type{CompressedBeliefMDPState}, v, m::CompressedBeliefMDP) = 
 POMDPs.convert_s(::Type{<:AbstractArray}, s::DiscreteBelief, pomdp::POMDP) = s.b
 POMDPs.convert_s(::Type{<:DiscreteBelief}, v, pomdp::POMDP) = DiscreteBelief(pomdp, vec(v))
 
-# ExplicitDistribution = Union{SparseCat, BoolDistribution, Deterministic, Uniform}  # distributions w/ explicit PDF from POMDPs.jl (https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/distributions/#Implemented-Distributions)
-# POMDPs.convert_s(::Type{<:AbstractArray}, b::ExplicitDistribution, pomdp::POMDP) = [pdf(b, s) for s in states(pomdp)]
+ExplicitDistribution = Union{SparseCat, BoolDistribution, Deterministic, Uniform}  # distributions w/ explicit PDF from POMDPs.jl (https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/distributions/#Implemented-Distributions)
+POMDPs.convert_s(::Type{<:AbstractArray}, b::ExplicitDistribution, pomdp::POMDP) = [pdf(b, s) for s in states(pomdp)]
 
-# function POMDPs.convert_s(::Type{<:SparseCat}, vec, pomdp::POMDP)
-#     @assert length(vec) == length(states(pomdp))
-#     values = []
-#     probabilities = []
-#     for (s, p) in zip(states(pomdp), vec)
-#         if p != 0
-#             push!(values, s)
-#             push!(probabilities, p)
-#         end
-#     end
-#     dist = SparseCat(values, probabilities)
-#     return dist
-# end
+function POMDPs.convert_s(::Type{<:SparseCat}, vec, pomdp::POMDP)
+    @assert length(vec) == length(states(pomdp))
+    values = []
+    probabilities = []
+    for (s, p) in zip(states(pomdp), vec)
+        if p != 0
+            push!(values, s)
+            push!(probabilities, p)
+        end
+    end
+    dist = SparseCat(values, probabilities)
+    return dist
+end
 
-# POMDPs.convert_s(::Type{<:BoolDistribution}, vec, pomdp::POMDP) = BoolDistribution(vec[1])
+POMDPs.convert_s(::Type{<:BoolDistribution}, vec, pomdp::POMDP) = BoolDistribution(vec[1])
 # TODO: add conversions to Uniform + Deterministic
