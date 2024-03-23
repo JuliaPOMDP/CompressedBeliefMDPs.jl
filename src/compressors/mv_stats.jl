@@ -9,13 +9,10 @@ function fit!(compressor::MultivariateStatsCompressor{T}, beliefs) where T<:Mult
     compressor.M = MultivariateStats.fit(T, beliefs'; maxoutdim=compressor.maxoutdim)
 end
 
+# TODO: is there a way to solve this w/ multiple dispatch? clean up
 function compress(compressor::MultivariateStatsCompressor, beliefs)
     # TODO: is there better way to do this?
-    if ndims(beliefs) == 2
-        return MultivariateStats.predict(compressor.M, beliefs')'
-    else
-        return MultivariateStats.predict(compressor.M, beliefs)
-    end
+    return ndims(beliefs) == 2 ? predict(compressor.M, beliefs')' : vec(predict(compressor.M, beliefs))
 end
 
 decompress(compressor::MultivariateStatsCompressor, compressed) = MultivariateStats.reconstruct(compressor.M, compressed)

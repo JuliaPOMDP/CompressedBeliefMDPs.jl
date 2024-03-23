@@ -4,6 +4,7 @@ authors = ["Logan-Mondal-Bhamidipaty"]
 version = "1.0.0-DEV"
 
 [deps]
+Bijections = "e2ed5e7c-b2de-5872-ae92-c73ca462fb04"
 Infiltrator = "5903a43b-9cc3-4c30-8d17-598619ec4e9b"
 Lazy = "50d2b5c4-7a5e-59d5-8109-a42b560f39c0"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"

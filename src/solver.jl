@@ -1,69 +1,41 @@
-using NearestNeighbors
-using StaticArrays
-using LocalFunctionApproximation
-using LocalApproximationValueIteration: LocalApproximationValueIterationSolver, LocalApproximationValueIterationPolicy
-
-# TODO: add references to the appropriate local approx libraries in the docstring 
-struct CompressedSolver <: POMDPs.Solver
-    sampler::Sampler
-    compressor::Compressor
-    approximator::LocalFunctionApproximator
+struct CompressedBeliefSolver <: Solver
+    explorer::Union{Policy, ExplorationPolicy}
     updater::Updater
-    base_solver::LocalApproximationValueIterationSolver
+    compressor::Compressor
+    base_solver::Solver
+    n::Integer
 end
 
-struct CompressedSolverPolicy <: Policy
-    m::CompressedBeliefMDP
-    base_policy::LocalApproximationValueIterationPolicy
-end
-
-# TODO: use macro forwarding
-function POMDPs.action(p::CompressedSolverPolicy, b)
-    s = encode(p.m, b)
-    return action(p.base_policy, s)
-end
-
-function POMDPs.value(p::CompressedSolverPolicy, b)
-    s = encode(p.m, b)
-    return value(p.base_policy, s)
-end
-
-POMDPs.updater(policy::CompressedSolverPolicy) = policy.m.bmdp.updater
-
-function CompressedSolver(
-    pomdp::POMDP, 
-    sampler::BaseSampler, 
-    compressor::Compressor; 
-    n_samples::Integer=100, 
-    k::Integer=1, 
-    verbose=false, 
-    n_generative_samples=500,
-    max_iterations=1000
+function CompressedBeliefSolver(
+    explorer::Union{Policy, ExplorationPolicy},
+    updater::Updater,
+    compressor::Compressor,
+    base_solver::Solver;
+    n=100
 )
-    # sample and compress beliefs
-    B = sample(sampler, pomdp; n_samples=n_samples)
-    fit!(compressor, B)
-    B̃ = compress(compressor, B)
-
-    # make function approximator
-    data = [SVector(row...) for row in eachrow(B̃)]
-    tree = KDTree(data)
-    approximator = LocalNNFunctionApproximator(tree, data, k)
-
-    base_solver = LocalApproximationValueIterationSolver(
-        approximator; 
-        verbose=verbose, 
-        max_iterations=max_iterations, 
-        is_mdp_generative=true, 
-        n_generative_samples=n_generative_samples
-    )
-
-    return CompressedSolver(sampler, compressor, approximator, sampler.updater, base_solver)
+    return CompressedBeliefSolver(explorer, updater, compressor, base_solver, n)
 end
 
-function POMDPs.solve(solver::CompressedSolver, pomdp::POMDP)   
-    cbmdp = CompressedBeliefMDP(pomdp, solver.updater, solver.compressor)
-    approx_policy = solve(solver.base_solver, cbmdp)
-    return CompressedSolverPolicy(cbmdp, approx_policy)
+# TODO: make compressed solver that infers everything 
+# TODO: make compressed solver that uses local FA solver
+
+struct CompressedBeliefPolicy <: Policy
+    m::CompressedBeliefMDP
+    base_policy::Policy
 end
 
+POMDPs.action(p::CompressedBeliefPolicy, b) = action(p.base_policy, encode(m, b))
+POMDPs.value(p::CompressedBeliefPolicy, b) = value(p.base_policy, encode(m, b))
+POMDPs.updater(p::CompressedBeliefPolicy) = p.m.bmdp.updater
+
+function POMDPs.solve(solver::CompressedBeliefSolver, pomdp::POMDP)
+    B = sample(pomdp, solver.explorer, solver.updater, solver.n)
+    B_numerical = mapreduce(b->convert_s(AbstractArray{Float64}, b, pomdp), hcat, B)'
+    fit!(solver.compressor, B_numerical)
+    B̃ = compress(solver.compressor, B_numerical)
+    m = CompressedBeliefMDP(pomdp, solver.updater, solver.compressor)
+    ϕ = Dict(unique(t->t[2], zip(B, eachrow(B̃))))
+    merge!(m.ϕ, ϕ)  # update compression cache
+    base_policy = solve(solver.base_solver, m)
+    return CompressedBeliefPolicy(m, base_policy)
+end

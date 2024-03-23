@@ -4,8 +4,13 @@ using Infiltrator
 
 using POMDPs
 using POMDPTools
+using LocalApproximationValueIteration
+using LocalFunctionApproximation
 
 import Lazy: @forward
+using Bijections
+using NearestNeighbors
+using StaticArrays
 
 using LinearAlgebra
 using Random
@@ -27,22 +32,16 @@ include("compressors/compressor.jl")
 include("compressors/mv_stats.jl")
 
 export
-    Sampler,
-    sample,
-    # DiscreteEpsGreedySampler,
-    # DiscreteSoftmaxSampler,
-    DiscreteRandomSampler
-include("samplers/sampler.jl")
-include("samplers/utils.jl")
+    sample
+include("sampler.jl")
 
 export
     CompressedBeliefMDP,
-    CompressedBeliefMDPState
 include("cbmdp.jl")
 
 export
-    CompressedSolver,
-    CompressedSolverPolicy
+    CompressedBeliefSolver,
+    CompressedBeliefPolicy,
     solve
 include("solver.jl")
 

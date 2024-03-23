@@ -26,3 +26,5 @@ function compress end
 Decompress the compressed beliefs using method associated with compressor, and returns the reconstructed beliefs.
 """
 function decompress end
+
+# TODO: remove decompress and make compress a functor (https://docs.julialang.org/en/v1/manual/methods/#Note-on-Optional-and-keyword-Arguments)

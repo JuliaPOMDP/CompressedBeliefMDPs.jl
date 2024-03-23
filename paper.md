@@ -65,15 +65,13 @@ v = value(approx_policy, s)
 a = action(approx_policy, s)
 ```
 
-![We see that that the compressed solver recovers a similar value function to SARSOP [@SARSOP].](./images/baby_benchmark.svg){height="200pt"}
-
 ## Function Approximators
 
 CompressedBeliefMDPs.jl is compatible with any `LocalFunctionApproximator`. It supports grid interpolations [@grid] through [GridInterpolations.jl](https://github.com/sisl/GridInterpolations.jl) and $k$-nearest neighbors [@kNN] through [NearestNeighbors.jl](https://github.com/KristofferC/NearestNeighbors.jl). For more details, see [LocalFunctionApproximation.jl](https://github.com/sisl/LocalFunctionApproximation.jl)
 
 ## Compressors
 
-CompressedBeliefMDPs.jl provides several wrappers for commonly used compressors. Through [MultiVariateStats.jl](https://juliastats.org/MultivariateStats.jl/stable/), we include PCA [@PCA], kernel PCA [@kernelPCA], and probabilistic PCA [@PPCA]. Through a forthcoming package `ExpFamilyPCA.jl`, we also include exponential family PCA [@EPCA]. This is more general than the Poisson exponential family PCA in @Roy: ExpFamilyPCA.jl supports compression objectives induced from _any_ convex function, not just the Poisson link function.
+CompressedBeliefMDPs.jl provides several wrappers for commonly used compressors. Through [MultiVariateStats.jl](https://juliastats.org/MultivariateStats.jl/stable/), we include PCA [@PCA], kernel PCA [@kernelPCA], and probabilistic PCA [@PPCA].
 
 # Acknowledgements
 
