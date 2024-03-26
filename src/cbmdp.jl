@@ -57,54 +57,7 @@ POMDPs.discount(m::CompressedBeliefMDP) = discount(m.bmdp)
 POMDPs.convert_s(t::Type, s, m::CompressedBeliefMDP) = convert_s(t, s, m.bmdp.pomdp)
 POMDPs.convert_s(t::Type{<:AbstractArray}, s::AbstractArray, m::CompressedBeliefMDP) = convert_s(t, s, m.bmdp.pomdp)  # NOTE: this second implementation is b/c to get around a requirement from POMDPLinter
 
-# TODO: maybe don't include sparsecat
+# TODO: don't include sparsecat
 ExplicitDistribution = Union{SparseCat, BoolDistribution, Deterministic, Uniform}  # distributions w/ explicit PDFs from POMDPs.jl (https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/distributions/#Implemented-Distributions)
 POMDPs.convert_s(::Type{<:AbstractArray}, s::ExplicitDistribution, m::POMDP) = [pdf(s, x) for x in states(m)]
-
-# function POMDPs.convert_s(t::Type{V}, s, m::CompressedBeliefMDP) where V<:AbstractArray
-#     convert_s(t, s, m.bmdp.pomdp)
-# end
-
-# function POMDPs.convert_s(t::Type{S}, v::V, m::CompressedBeliefMDP) where {S, V<:AbstractArray}
-#     convert_s(t, v, m.bmdp.pomdp)
-# end
-
-# TODO: try to add issue to github for this since this is only to get around POMDPLinter
-
-
-
-
-
-# POMDPs.convert_s(::Type{V}, s::CompressedBeliefMDPState, m::CompressedBeliefMDP) where V<:AbstractArray = convert_s(V, s.b̃, m)
-# function POMDPs.convert_s(::Type{V}, s, m::CompressedBeliefMDP) where V<:AbstractArray
-#     # TODO: come up w/ more elegant solution here
-#     return convert_s(V, s.b̃ isa Matrix ? vec(s.b̃) : s.b̃, m)
-# end
-# # POMDPs.convert_s(::Type{CompressedBeliefMDPState}, v::AbstractArray, m::CompressedBeliefMDP) = CompressedBeliefMDPState(v)
-# POMDPs.convert_s(::Type{CompressedBeliefMDPState}, v, m::CompressedBeliefMDP) = CompressedBeliefMDPState(convert_s(Vector, v, m.bmdp.pomdp))
-
-# convenience methods
 POMDPs.convert_s(::Type{V}, s::DiscreteBelief, p::POMDP) where V<:AbstractArray = s.b
-# POMDPs.convert_s(::Type{S}, v::V, p::POMDP) where {S, V<:AbstractArray} = DiscreteBelief(p, _process(convert(Vector{Float64}, vec(v))))  # TODO: is there Julian shorthand for type conversions?
-# POMDPs.convert_s(::Type{<:AbstractArray}, s::DiscreteBelief, pomdp::POMDP) = s.b
-# POMDPs.convert_s(::Type{<:DiscreteBelief}, v, problem::Union{POMDP, MDP) = DiscreteBelief(pomdp, vec(v))
-
-# ExplicitDistribution = Union{SparseCat, BoolDistribution, Deterministic, Uniform}  # distributions w/ explicit PDF from POMDPs.jl (https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/distributions/#Implemented-Distributions)
-# POMDPs.convert_s(::Type{<:AbstractArray}, b::ExplicitDistribution, pomdp::POMDP) = [pdf(b, s) for s in states(pomdp)]
-
-# function POMDPs.convert_s(::Type{<:SparseCat}, vec, pomdp::POMDP)
-#     @assert length(vec) == length(states(pomdp))
-#     values = []
-#     probabilities = []
-#     for (s, p) in zip(states(pomdp), vec)
-#         if p != 0
-#             push!(values, s)
-#             push!(probabilities, p)
-#         end
-#     end
-#     dist = SparseCat(values, probabilities)
-#     return dist
-# end
-
-# POMDPs.convert_s(::Type{<:BoolDistribution}, vec, pomdp::POMDP) = BoolDistribution(vec[1])
-# # TODO: add conversions to Uniform + Deterministic
