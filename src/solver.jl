@@ -24,11 +24,34 @@ struct CompressedBeliefSolver <: Solver
     base_solver::Solver
 end
 
+function _make_compressed_belief_MDP(
+    pomdp::POMDP, explorer::Union{ExplorationPolicy, Policy}, 
+    updater::Updater,
+    compressor::Compressor,
+    n::Integer,
+    fit_kwargs::Union{Nothing, Dict}=nothing
+)
+    # sample beliefs
+    B = sample(pomdp, explorer, updater, n)
+
+    # compress beliefs and cache mapping
+    B_numerical = mapreduce(b->convert_s(AbstractArray{Float64}, b, pomdp), hcat, B)'
+    isnothing(fit_kwargs) ? fit!(compressor, B_numerical) : fit!(compressor, B_numerical; fit_kwargs...)
+    B̃ = compressor(B_numerical)
+    ϕ = Dict(unique(t->t[2], zip(B, eachrow(B̃))))
+
+    # construct the compressed belief-state MDP
+    m = CompressedBeliefMDP(pomdp, updater, compressor)
+    merge!(m.ϕ, ϕ)  # update the compression cache
+
+    return m, B̃
+end
+
 # TODO: add seeding
 function CompressedBeliefSolver(
     pomdp::POMDP;
     explorer::Union{Policy, ExplorationPolicy}=RandomPolicy(pomdp),
-    updater::Updater=applicable(POMDPs.states, pomdp) ? DiscreteUpdater(pomdp) : BootstrapFilter(pomdp, 5000),  # hack to determine default updater, may select incompatible Updater
+    updater::Updater=applicable(POMDPs.states, pomdp) ? DiscreteUpdater(pomdp) : BootstrapFilter(pomdp, 5000),  # hack to determine default updater, may select incompatible Updater for complex custom POMDPs
     compressor::Compressor=PCACompressor(1), 
     n::Integer=50,  # max number of belief samples to compress
     interp::Union{Nothing, LocalFunctionApproximator}=nothing,
@@ -37,19 +60,9 @@ function CompressedBeliefSolver(
     max_iterations=1000,  # for value iteration
     n_generative_samples=10,  # number of steps to look ahead when calculated expected reward
     belres::Float64=1e-3,
+    fit_kwargs::Union{Nothing, Dict}=nothing
 )
-    # sample beliefs
-    B = sample(pomdp, explorer, updater, n)
-
-    # compress beliefs and cache mapping
-    B_numerical = mapreduce(b->convert_s(AbstractArray{Float64}, b, pomdp), hcat, B)'
-    fit!(compressor, B_numerical)
-    B̃ = compressor(B_numerical)
-    ϕ = Dict(unique(t->t[2], zip(B, eachrow(B̃))))
-
-    # construct the compressed belief-state MDP
-    m = CompressedBeliefMDP(pomdp, updater, compressor)
-    merge!(m.ϕ, ϕ)  # update the compression cache
+    m, B̃ = _make_compressed_belief_MDP(pomdp, explorer, updater, compressor, n, fit_kwargs)
 
     # define the interpolator for the solver
     if isnothing(interp)
@@ -68,6 +81,19 @@ function CompressedBeliefSolver(
         n_generative_samples=n_generative_samples
     )
 
+    return CompressedBeliefSolver(m, base_solver)
+end
+
+function CompressedBeliefSolver(
+    pomdp::POMDP,
+    base_solver::Solver;
+    explorer::Union{Policy, ExplorationPolicy}=RandomPolicy(pomdp),
+    updater::Updater=applicable(POMDPs.states, pomdp) ? DiscreteUpdater(pomdp) : BootstrapFilter(pomdp, 5000),  # hack to determine default updater, may select incompatible Updater for complex custom POMDPs
+    compressor::Compressor=PCACompressor(1), 
+    n::Integer=50,  # max number of belief samples to compress
+    fit_kwargs::Union{Nothing, Dict}=nothing,
+)
+    m, _ = _make_compressed_belief_MDP(pomdp, explorer, updater, compressor, n, fit_kwargs)
     return CompressedBeliefSolver(m, base_solver)
 end
 

@@ -21,17 +21,23 @@ export
     # Compressor interface
     Compressor,
     fit!,
-    compress,
-    decompress,
-    # MultivariateStats Compressors
-    MultivariateStatsCompressor,
+    # StatsAPI Compressors
+    StatsCompressor,
+    ## MultivariateStats wrappers
     PCACompressor,
     KernelPCACompressor,
     PPCACompressor,
     FactorAnalysisCompressor,
-    MDSCompressor
+    MDSCompressor,
+    ## ManifoldLearning wrappers
+    IsomapCompressor,
+    LLECompressor,
+    HLLECompressor,
+    LEMCompressor,
+    LTSACompressor,
+    DiffMapCompressor
 include("compressors/compressor.jl")
-include("compressors/mv_stats.jl")
+include("compressors/stats_compressors.jl")
 
 export
     sample
