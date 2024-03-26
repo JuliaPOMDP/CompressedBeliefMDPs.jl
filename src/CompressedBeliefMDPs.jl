@@ -4,6 +4,7 @@ using Infiltrator
 
 using POMDPs
 using POMDPTools
+using ParticleFilters
 using LocalApproximationValueIteration
 using LocalFunctionApproximation
 
@@ -26,8 +27,9 @@ export
     MultivariateStatsCompressor,
     PCACompressor,
     KernelPCACompressor,
-    PPCACompressor
-    # FactorAnalysisCompressor  # TODO: debug
+    PPCACompressor,
+    FactorAnalysisCompressor,
+    MDSCompressor
 include("compressors/compressor.jl")
 include("compressors/mv_stats.jl")
 
@@ -36,7 +38,7 @@ export
 include("sampler.jl")
 
 export
-    CompressedBeliefMDP,
+    CompressedBeliefMDP
 include("cbmdp.jl")
 
 export

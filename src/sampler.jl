@@ -8,3 +8,8 @@ end
 function sample(pomdp::POMDP, policy::ExplorationPolicy, updater::Updater, n::Integer)
     # TODO:
 end
+
+
+"""
+Adapted from algorithm 21.13 from AFDM
+"""
