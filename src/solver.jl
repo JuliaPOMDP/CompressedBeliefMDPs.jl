@@ -103,7 +103,7 @@ function CompressedBeliefSolver(
     # sampling arguments
     explorer::Union{Policy, ExplorationPolicy}=RandomPolicy(pomdp),  # explorer policy; only used if expansion is false
     updater::Updater=DiscreteUpdater(pomdp),  # only works for discrete S
-    compressor::Compressor=PCACompressor(1),
+    compressor::Compressor=PCACompressor(2),
     expansion=true,  # only works for discrete S, A, O
     n::Integer=5,  # if expansion, then n is the number of times we expand; otherwise, n is max number of belief samples
     metric::NearestNeighbors.MinkowskiMetric=Euclidean(),

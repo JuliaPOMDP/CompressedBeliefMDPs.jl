@@ -14,17 +14,15 @@ add CompressedBeliefMDPs
 
 CompressedBeliefMDPs.jl is compatible with the [POMDPs.jl](https://juliapomdp.github.io/POMDPs.jl/latest/) ecosystem.
 ```julia
+using POMDPs, POMDPModels
 using CompressedBeliefMDPs
 
-using POMDPs
-using POMDPModels
-using POMDPTools
-
-pomdp = TMaze(200, 0.99)
-sampler = DiscreteRandomSampler(pomdp)
-compressor = PCACompressor(2)
-solver = CompressedSolver(pomdp, sampler, compressor)
-policy = solve(solver, pomdp)
+pomdp = BabyPOMDP()
+solver = CompressedBeliefSolver(pomdp)
+policy = POMDPs.solve(solver, pomdp)
+s = initialstate(pomdp)
+v = value(policy, s)
+a = action(policy, s)
 ```
 
 The solver finds an _approximate_ policy for the POMDP.
@@ -35,12 +33,16 @@ a = action(policy, s)
 ```
 # Sampling
 
-Compression is handled by the `Sampler` abstract type.
+There are two ways to collect belief samples: belief expansion or policy rollouts.
 
-# Compression
+## Belief Expansion
 
-Compression is handled by the `Compressor` abstract type.
+CompressedBeliefMDPs.jl implements a fast version of exploratory belief expansion (Algorithm 21.13 from [Algorithms for Decision Making](https://algorithmsbook.com/)) that uses [$k$-d trees](https://en.wikipedia.org/wiki/K-d_tree) from [NearestNeighbors.jl](https://github.com/KristofferC/NearestNeighbors.jl). Belief expansion is supported for POMDPs with finite state, action, and observation spaces.
 
-## [MultivariateStats.jl](https://juliapackages.com/p/multivariatestats) Wrappers
+## Policy Rollouts 
 
-As a convenience, we provide several wrappers for compression schemes from MultivariateStats.jl.
+
+
+# Compressors
+
+As a convenience, we provide several wrappers for compression schemes from [MultivariateStats.jl](https://juliastats.org/MultivariateStats.jl/stable/) and [ManifoldLearning.jl](https://wildart.github.io/ManifoldLearning.jl/stable/).
