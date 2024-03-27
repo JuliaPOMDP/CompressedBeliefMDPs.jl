@@ -29,10 +29,16 @@ function _make_compressed_belief_MDP(
     updater::Updater,
     compressor::Compressor,
     n::Integer,
-    fit_kwargs::Union{Nothing, Dict}=nothing
+    expansion::Bool,
+    fit_kwargs::Union{Nothing, Dict}=nothing,
+    metric::NearestNeighbors.MinkowskiMetric=Euclidean()
 )
     # sample beliefs
-    B = sample(pomdp, explorer, updater, n)
+    if expansion
+        B = exploratory_belief_expansion(pomdp, updater; n=n, metric=metric)
+    else
+        B = sample(pomdp, explorer, updater, n)
+    end
 
     # compress beliefs and cache mapping
     B_numerical = mapreduce(b->convert_s(AbstractArray{Float64}, b, pomdp), hcat, B)'
@@ -50,19 +56,25 @@ end
 # TODO: add seeding
 function CompressedBeliefSolver(
     pomdp::POMDP;
-    explorer::Union{Policy, ExplorationPolicy}=RandomPolicy(pomdp),
-    updater::Updater=applicable(POMDPs.states, pomdp) ? DiscreteUpdater(pomdp) : BootstrapFilter(pomdp, 5000),  # hack to determine default updater, may select incompatible Updater for complex custom POMDPs
-    compressor::Compressor=PCACompressor(1), 
-    n::Integer=50,  # max number of belief samples to compress
+
+    # sampling arguments
+    explorer::Union{Policy, ExplorationPolicy}=RandomPolicy(pomdp),  # explorer policy; only used if expansion is false
+    updater::Updater=DiscreteUpdater(pomdp),  # only works for discrete S
+    compressor::Compressor=PCACompressor(1),
+    expansion=true,  # only works for discrete S, A, O
+    n::Integer=5,  # if expansion, then n is the number of times we expand; otherwise, n is max number of belief samples
+    metric::NearestNeighbors.MinkowskiMetric=Euclidean(),
+    fit_kwargs::Union{Nothing, Dict}=nothing,
+
+    # base policy arguments
     interp::Union{Nothing, LocalFunctionApproximator}=nothing,
     k=1,  # k nearest neighbors; only used if interp is nothing
     verbose=false,
     max_iterations=1000,  # for value iteration
     n_generative_samples=10,  # number of steps to look ahead when calculated expected reward
-    belres::Float64=1e-3,
-    fit_kwargs::Union{Nothing, Dict}=nothing
+    belres::Float64=1e-3
 )
-    m, B̃ = _make_compressed_belief_MDP(pomdp, explorer, updater, compressor, n, fit_kwargs)
+    m, B̃ = _make_compressed_belief_MDP(pomdp, explorer, updater, compressor, n, expansion, fit_kwargs, metric)
 
     # define the interpolator for the solver
     if isnothing(interp)
@@ -87,15 +99,20 @@ end
 function CompressedBeliefSolver(
     pomdp::POMDP,
     base_solver::Solver;
-    explorer::Union{Policy, ExplorationPolicy}=RandomPolicy(pomdp),
-    updater::Updater=applicable(POMDPs.states, pomdp) ? DiscreteUpdater(pomdp) : BootstrapFilter(pomdp, 5000),  # hack to determine default updater, may select incompatible Updater for complex custom POMDPs
-    compressor::Compressor=PCACompressor(1), 
-    n::Integer=50,  # max number of belief samples to compress
-    fit_kwargs::Union{Nothing, Dict}=nothing,
+
+    # sampling arguments
+    explorer::Union{Policy, ExplorationPolicy}=RandomPolicy(pomdp),  # explorer policy; only used if expansion is false
+    updater::Updater=DiscreteUpdater(pomdp),  # only works for discrete S
+    compressor::Compressor=PCACompressor(1),
+    expansion=true,  # only works for discrete S, A, O
+    n::Integer=5,  # if expansion, then n is the number of times we expand; otherwise, n is max number of belief samples
+    metric::NearestNeighbors.MinkowskiMetric=Euclidean(),
+    fit_kwargs::Union{Nothing, Dict}=nothing
 )
-    m, _ = _make_compressed_belief_MDP(pomdp, explorer, updater, compressor, n, fit_kwargs)
+    m, _ = _make_compressed_belief_MDP(pomdp, explorer, updater, compressor, n, expansion, fit_kwargs, metric)
     return CompressedBeliefSolver(m, base_solver)
 end
+
 
 function POMDPs.solve(solver::CompressedBeliefSolver, pomdp::POMDP)
     if solver.m.bmdp.pomdp !== pomdp

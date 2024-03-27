@@ -18,30 +18,33 @@ using Random
 
 
 export
-    # Compressor interface
+    ### Compressor Interface ###
     Compressor,
     fit!,
-    # StatsAPI Compressors
-    StatsCompressor,
-    ## MultivariateStats wrappers
+    ### MultivariateStats wrappers ###
+    MVSCompressor,
     PCACompressor,
     KernelPCACompressor,
     PPCACompressor,
     FactorAnalysisCompressor,
-    MDSCompressor,
-    ## ManifoldLearning wrappers
-    IsomapCompressor,
-    LLECompressor,
-    HLLECompressor,
-    LEMCompressor,
-    LTSACompressor,
-    DiffMapCompressor
+    # MDSCompressor,
+    ### ManifoldLearning wrappers ###
+    ManifoldCompressor,
+    IsomapCompressor
+    # LLECompressor,
+    # HLLECompressor,
+    # LEMCompressor,
+    # LTSACompressor,
+    # DiffMapCompressor
 include("compressors/compressor.jl")
-include("compressors/stats_compressors.jl")
+include("compressors/mvs_compressors.jl")
+include("compressors/manifold_compressors.jl")
 
 export
-    sample
-include("sampler.jl")
+    sample,
+    exploratory_belief_expansion
+include("samplers/policy_simulation.jl")
+include("samplers/belief_expansion.jl")
 
 export
     CompressedBeliefMDP
