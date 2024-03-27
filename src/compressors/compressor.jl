@@ -1,7 +1,7 @@
 abstract type Compressor end
 
 """
-    fit!(compressor::Compressor, beliefs; kwargs...)
+    fit!(compressor::Compressor, beliefs)
 
 Fit the compressor to beliefs.
 """

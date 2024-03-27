@@ -16,7 +16,6 @@ using StaticArrays
 using LinearAlgebra
 using Random
 
-
 export
     ### Compressor Interface ###
     Compressor,
@@ -41,10 +40,14 @@ include("compressors/mvs_compressors.jl")
 include("compressors/manifold_compressors.jl")
 
 export
+    Sampler,
     sample,
-    exploratory_belief_expansion
-include("samplers/policy_simulation.jl")
-include("samplers/belief_expansion.jl")
+    BeliefExpansionSampler,
+    PolicySampler,
+    ExplorationPolicySampler
+include("samplers/samplers.jl")
+include("samplers/expansion.jl")
+include("samplers/rollout.jl")
 
 export
     CompressedBeliefMDP

@@ -8,7 +8,7 @@ using MCTS
 
 using Distances
 
-# TODO: set global seed?
+Random.seed!(1)
 
 @testset "CompressedBeliefMDPs.jl" begin
     include("compressor_tests.jl")

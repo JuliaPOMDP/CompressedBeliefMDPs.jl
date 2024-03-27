@@ -24,25 +24,13 @@ struct CompressedBeliefSolver <: Solver
     base_solver::Solver
 end
 
-function _make_compressed_belief_MDP(
-    pomdp::POMDP, explorer::Union{ExplorationPolicy, Policy}, 
-    updater::Updater,
-    compressor::Compressor,
-    n::Integer,
-    expansion::Bool,
-    fit_kwargs::Union{Nothing, Dict}=nothing,
-    metric::NearestNeighbors.MinkowskiMetric=Euclidean()
-)
+function _make_compressed_belief_MDP(pomdp::POMDP, sampler::Sampler, updater::Updater, compressor::Compressor)
     # sample beliefs
-    if expansion
-        B = exploratory_belief_expansion(pomdp, updater; n=n, metric=metric)
-    else
-        B = sample(pomdp, explorer, updater, n)
-    end
+    B = sampler(pomdp)
 
     # compress beliefs and cache mapping
     B_numerical = Matrix(mapreduce(b->convert_s(AbstractArray{Float64}, b, pomdp), hcat, B)')
-    isnothing(fit_kwargs) ? fit!(compressor, B_numerical) : fit!(compressor, B_numerical; fit_kwargs...)
+    fit!(compressor, B_numerical)
     B̃ = compressor(B_numerical)
     ϕ = Dict(unique(t->t[2], zip(B, eachrow(B̃))))
 
@@ -53,18 +41,23 @@ function _make_compressed_belief_MDP(
     return m, B̃
 end
 
+function CompressedBeliefSolver(
+    pomdp::POMDP,
+    base_solver::Solver;
+    updater::Updater=DiscreteUpdater(pomdp),
+    sampler::Sampler=BeliefExpansionSampler(pomdp),
+    compressor::Compressor=PCACompressor(1)
+)
+    m, _ = _make_compressed_belief_MDP(pomdp, sampler, updater, compressor)
+    return CompressedBeliefSolver(m, base_solver)
+end
+
 # TODO: add seeding
 function CompressedBeliefSolver(
     pomdp::POMDP;
-
-    # sampling arguments
-    explorer::Union{Policy, ExplorationPolicy}=RandomPolicy(pomdp),  # explorer policy; only used if expansion is false
-    updater::Updater=DiscreteUpdater(pomdp),  # only works for discrete S
-    compressor::Compressor=KernelPCA(1),
-    expansion=true,  # only works for discrete S, A, O
-    n::Integer=5,  # if expansion, then n is the number of times we expand; otherwise, n is max number of belief samples
-    metric::NearestNeighbors.MinkowskiMetric=Euclidean(),
-    fit_kwargs::Union{Nothing, Dict}=nothing,
+    updater::Updater=DiscreteUpdater(pomdp),
+    sampler::Sampler=BeliefExpansionSampler(pomdp),
+    compressor::Compressor=PCACompressor(1),
 
     # base policy arguments
     interp::Union{Nothing, LocalFunctionApproximator}=nothing,
@@ -74,16 +67,16 @@ function CompressedBeliefSolver(
     n_generative_samples=10,  # number of steps to look ahead when calculated expected reward
     belres::Float64=1e-3
 )
-    m, B̃ = _make_compressed_belief_MDP(pomdp, explorer, updater, compressor, n, expansion, fit_kwargs, metric)
+    m, B̃ = _make_compressed_belief_MDP(pomdp, sampler, updater, compressor)
 
     # define the interpolator for the solver
     if isnothing(interp)
         data = map(row->SVector(row...), eachrow(B̃))
         tree = KDTree(data)
-        interp = LocalNNFunctionApproximator(tree, data, k)  # TODO: check that we need this
+        interp = LocalNNFunctionApproximator(tree, data, k)
     end
     
-    # build the based solver
+    # build the base solver
     base_solver = LocalApproximationValueIterationSolver(
         interp,
         max_iterations=max_iterations,
@@ -95,24 +88,6 @@ function CompressedBeliefSolver(
 
     return CompressedBeliefSolver(m, base_solver)
 end
-
-function CompressedBeliefSolver(
-    pomdp::POMDP,
-    base_solver::Solver;
-
-    # sampling arguments
-    explorer::Union{Policy, ExplorationPolicy}=RandomPolicy(pomdp),  # explorer policy; only used if expansion is false
-    updater::Updater=DiscreteUpdater(pomdp),  # only works for discrete S
-    compressor::Compressor=KernelPCA(1),
-    expansion=true,  # only works for discrete S, A, O
-    n::Integer=5,  # if expansion, then n is the number of times we expand; otherwise, n is max number of belief samples
-    metric::NearestNeighbors.MinkowskiMetric=Euclidean(),
-    fit_kwargs::Union{Nothing, Dict}=nothing
-)
-    m, _ = _make_compressed_belief_MDP(pomdp, explorer, updater, compressor, n, expansion, fit_kwargs, metric)
-    return CompressedBeliefSolver(m, base_solver)
-end
-
 
 function POMDPs.solve(solver::CompressedBeliefSolver, pomdp::POMDP)
     if solver.m.bmdp.pomdp !== pomdp
