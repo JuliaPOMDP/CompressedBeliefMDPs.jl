@@ -41,7 +41,7 @@ function _make_compressed_belief_MDP(
     end
 
     # compress beliefs and cache mapping
-    B_numerical = mapreduce(b->convert_s(AbstractArray{Float64}, b, pomdp), hcat, B)'
+    B_numerical = Matrix(mapreduce(b->convert_s(AbstractArray{Float64}, b, pomdp), hcat, B)')
     isnothing(fit_kwargs) ? fit!(compressor, B_numerical) : fit!(compressor, B_numerical; fit_kwargs...)
     B̃ = compressor(B_numerical)
     ϕ = Dict(unique(t->t[2], zip(B, eachrow(B̃))))
