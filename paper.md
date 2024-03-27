@@ -25,7 +25,7 @@ bibliography: paper.bib
 
 # Summary
 
-A standard mathematical framework for specifying a sequential decision problem with state and outcome uncertainty is the partially observable Markov decision process (POMDP) [@AFDM], with applications to areas such as medicine [@drugs], sustainability [@carbon], and aerospace [@planes]. Unfortunately, solving real-world POMDPs with traditional methods is often computationally intractable [@complexity1; @complexity2]. Belief compression [@Roy] is a powerful technique for overcoming this limitation that's particularly effective when uncertainty is sparse or concentrated.
+A standard mathematical framework for specifying a sequential decision problem with state and outcome uncertainty is the partially observable Markov decision process (POMDP) [@AFDM], with applications to areas such as medicine [@drugs], sustainability [@carbon], and aerospace [@planes]. Unfortunately, solving real-world POMDPs with traditional methods is often computationally intractable [@complexity1; @complexity2]. Belief compression [@Roy] is a powerful technique for overcoming this limitation that can be particularly effective when uncertainty is sparse or concentrated.
 
 # Statement of Need
 
@@ -43,9 +43,13 @@ The belief compression algorithm in @Roy can be generalized into the following s
 4. create the compressed belief-state Markov decision process (MDP);
 5. and, solve the MDP with local approximation value iteration.
 
-For steps 1. and 2., CompressedBeliefMDPS.jl defines two abstract types `Sampler` and `Compressor`. For step 3., we use the `LocalFunctionApproximator` abstract type from [LocalApproximationValueIteration.jl](https://github.com/JuliaPOMDP/LocalApproximationValueIteration.jl). Note that we need function approximation because it gives us an error bound on the estimated value function: our estimate is no longer guaranteed to converge to the optimum since the value function is not necessarily convex over the compressed belief simplex. As a convenience, CompressedBeliefMDPs.jl defines several concrete subtypes which we describe later. 
+For steps 1\. and 2\., CompressedBeliefMDPS.jl defines two abstract types `Sampler` and `Compressor`. For step 3\., we use the `LocalFunctionApproximator` abstract type from [LocalApproximationValueIteration.jl](https://github.com/JuliaPOMDP/LocalApproximationValueIteration.jl). Following @Roy, we use local value approximation as our default underlying solver because provides an error bound on our value estimate [@error_bound]. We need an error bound because the value estimate may not converge to the optimum since it may no longer be convex over the compressed beliefs. Different MDP solvers can be used instead if specified in the constructor. For example, you can use a Monte-Carlo tree search solver [@MCTS] through [MCTS.jl](https://github.com/JuliaPOMDP/MCTS.jl) to use CompressedBeliefMDPs.jl with continuous state and action space POMDPs.
 
-For step 4., we define a new generative `POMDP` type called `CompressedBeliefMDP` that wraps [`GenerativeBeliefMDP`](https://juliapomdp.github.io/POMDPModelTools.jl/stable/model_transformations/#Generative-Belief-MDP). While @Roy builds the compressed belief-state MDP directly from the interpolated values, CompressedBeliefMDPs.jl delegates local approximation to the solver. This makes it easier to benchmark different approximators against the same compressed belief-state MDP. Finally, for step 5., we define `CompressedSolver <: POMDPs.Solver` that wraps the entire belief compression pipeline.
+For step 4\., we define a new generative `POMDP` type called `CompressedBeliefMDP` that wraps [`GenerativeBeliefMDP`](https://juliapomdp.github.io/POMDPModelTools.jl/stable/model_transformations/#Generative-Belief-MDP). While @Roy builds the compressed belief-state MDP directly from the interpolated values, CompressedBeliefMDPs.jl delegates local approximation to the solver. This makes it easier to benchmark different approximators against the same compressed belief-state MDP. Finally, for step 5\., we define `CompressedSolver` that specifies the entire belief compression pipeline.
+
+# Belief Expansion
+
+We use a modification of algorithm 21.13. Mention PBVI + KDtrees + metrics.
 
 # Example
 
@@ -56,25 +60,23 @@ using POMDPs, POMDPModels
 using CompressedBeliefMDPs
 
 pomdp = BabyPOMDP()
-sampler = DiscreteRandomSampler(pomdp)
-compressor = PCACompressor(2)
-approx_solver = CompressedSolver(pomdp, sampler, compressor)
-approx_policy = POMDPs.solve(approx_solver, pomdp)
+solver = CompressedBeliefSolver(pomdp)
+policy = POMDPs.solve(solver, pomdp)
 s = initialstate(pomdp)
-v = value(approx_policy, s)
-a = action(approx_policy, s)
+v = value(policy, s)
+a = action(policy, s)
 ```
 
 ## Function Approximators
 
-CompressedBeliefMDPs.jl is compatible with any `LocalFunctionApproximator`. It supports grid interpolations [@grid] through [GridInterpolations.jl](https://github.com/sisl/GridInterpolations.jl) and $k$-nearest neighbors [@kNN] through [NearestNeighbors.jl](https://github.com/KristofferC/NearestNeighbors.jl). For more details, see [LocalFunctionApproximation.jl](https://github.com/sisl/LocalFunctionApproximation.jl)
+CompressedBeliefMDPs.jl is compatible with any `LocalFunctionApproximator`. It supports grid and simplex interpolation [@grid] through [GridInterpolations.jl](https://github.com/sisl/GridInterpolations.jl) and $k$-nearest neighbors [@kNN] through [NearestNeighbors.jl](https://github.com/KristofferC/NearestNeighbors.jl). For more details, see [LocalFunctionApproximation.jl](https://github.com/sisl/LocalFunctionApproximation.jl).
 
 ## Compressors
 
 CompressedBeliefMDPs.jl provides several wrappers for commonly used compressors. Through [MultiVariateStats.jl](https://juliastats.org/MultivariateStats.jl/stable/), we include PCA [@PCA], kernel PCA [@kernelPCA], and probabilistic PCA [@PPCA].
 
-# Acknowledgements
+# Acknowledgments
 
-We thank Arec Jamgochian and Robert Moss for their advice.
+We thank Arec Jamgochian, Robert Moss, and Dylan Asmar for their invaluable guidance.
 
 # References
