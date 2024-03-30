@@ -29,15 +29,13 @@ export
     # MDSCompressor,
     ### ManifoldLearning wrappers ###
     ManifoldCompressor,
-    IsomapCompressor
-    # LLECompressor,
-    # HLLECompressor,
-    # LEMCompressor,
-    # LTSACompressor,
-    # DiffMapCompressor
+    IsomapCompressor,
+    ### Flux compressors ###
+    AutoencoderCompressor
 include("compressors/compressor.jl")
 include("compressors/mvs_compressors.jl")
 include("compressors/manifold_compressors.jl")
+include("compressors/autoencoders.jl")
 
 export
     Sampler,

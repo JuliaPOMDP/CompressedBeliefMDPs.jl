@@ -17,11 +17,10 @@ MVS_COMPRESSORS = (
 
 MANIFOLD_COMPRESSORS = (
     IsomapCompressor,
-    # LLECompressor,
-    # HLLECompressor,
-    # LEMCompressor,
-    # LTSACompressor,
-    # DiffMapCompressor
+)
+
+FLUX_COMPRESSORS = (
+    AutoencoderCompressor,
 )
 
 @testset "Compressor Tests" begin

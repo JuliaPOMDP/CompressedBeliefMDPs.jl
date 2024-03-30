@@ -29,7 +29,7 @@ function _make_compressed_belief_MDP(pomdp::POMDP, sampler::Sampler, updater::Up
     B = sampler(pomdp)
 
     # compress beliefs and cache mapping
-    B_numerical = Matrix(mapreduce(b->convert_s(AbstractArray{Float64}, b, pomdp), hcat, B)')
+    B_numerical = mapreduce(b->convert_s(AbstractArray{Float64}, b, pomdp), hcat, B)' |> Matrix
     fit!(compressor, B_numerical)
     B̃ = compressor(B_numerical)
     ϕ = Dict(unique(t->t[2], zip(B, eachrow(B̃))))
