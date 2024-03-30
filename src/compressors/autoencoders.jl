@@ -7,7 +7,7 @@ struct AutoencoderCompressor <: Compressor
     epochs
 end
 
-function AutoencoderCompressor(input_dim::Integer, latent_dim::Integer; opt=ADAM(0.01), epochs=10)
+function AutoencoderCompressor(input_dim::Integer, latent_dim::Integer; opt=Adam(), epochs=10)
     encoder = Dense(input_dim, latent_dim, sigmoid) |> f64
     decoder = Chain(Dense(latent_dim => input_dim), softmax)
     model = Chain(encoder, decoder) |> f64

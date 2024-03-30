@@ -38,4 +38,10 @@ FLUX_COMPRESSORS = (
             @test_nowarn test_compressor(pomdp, sampler, C(2; k=40))
         end
     end
+    @testset "Flux Compressors" begin
+        @testset "$C" for C in FLUX_COMPRESSORS
+            @test_nowarn test_compressor(pomdp, sampler, C(2, 1))
+            @test_nowarn test_compressor(pomdp, sampler, C(2, 2))
+        end
+    end
 end
