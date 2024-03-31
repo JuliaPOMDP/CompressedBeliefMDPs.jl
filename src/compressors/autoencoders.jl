@@ -25,10 +25,46 @@ function fit!(c::AutoencoderCompressor, beliefs)
 end
 
 function (c::AutoencoderCompressor)(beliefs)
-    # TODO: try to remove this pattern b/c it shows up in every freakin compressor
     return ndims(beliefs) == 2 ? c.encoder(beliefs')' : c.encoder(beliefs)
 end
 
+
 # struct VAECompressor <: Compressor
-#     latent::Integer
+#     encoder
+#     model
+#     optimizer
+#     epochs
+# end
+
+# # custom split layer from https://fluxml.ai/Flux.jl/dev/models/advanced/#Multiple-outputs:-a-custom-Split-layer
+# struct Split{T}
+#     paths::T
+#   end
+  
+# Split(paths...) = Split(paths)
+  
+# Flux.@layer Split
+  
+# (m::Split)(x::AbstractArray) = map(f -> f(x), m.paths)
+
+
+# "
+# Adapted from: https://github.com/FlyingWorkshop/DiffusionGNNTutorial
+# "
+# function VAECompressor(input_dim::Integer, hidden_dim::Integer=1, latent_dim::Integer; opt=Adam(), epochs=10)
+#     encoder = Chain(
+#         Dense(input_dim => hidden_dim, relu),
+#         Split(Dense(hidden_dim => latent_dim), Dense(hidden_dim => latent_dim))
+#     ) |> f64
+
+#     function model(x)
+#         μ, σ = encoder(x)
+#         ϵ = randn(size(μ)...)
+
+#     end
+
+#     encoder = Dense(input_dim, latent_dim, sigmoid) |> f64
+#     decoder = Chain(Dense(latent_dim => input_dim), softmax)
+#     model = Chain(encoder, decoder) |> f64
+#     return AutoencoderCompressor(encoder, model, opt, epochs)
 # end

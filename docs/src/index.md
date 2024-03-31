@@ -2,6 +2,3 @@
 
 Documentation for CompressedBeliefMDPs.jl
 
-```@autodocs
-Modules = [CompressedBeliefMDPs]
-```

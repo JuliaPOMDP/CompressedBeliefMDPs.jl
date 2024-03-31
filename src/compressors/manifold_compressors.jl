@@ -25,4 +25,6 @@ function fit!(c::ManifoldCompressor{T}, beliefs) where T
 end
 
 ### ManifoldLearning.jl Wrappers ###
+
+"""Wrapper for [`ManifoldLearning.Isomap`](https://wildart.github.io/ManifoldLearning.jl/stable/isomap/#Isomap)."""
 IsomapCompressor(maxoutdim::Integer; kwargs...) = ManifoldCompressor(maxoutdim, Isomap, kwargs)
