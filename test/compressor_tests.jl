@@ -34,8 +34,8 @@ FLUX_COMPRESSORS = (
     end
     @testset "ManifoldLearning Compressors" begin
         @testset "$C" for C in MANIFOLD_COMPRESSORS
-            @test_nowarn test_compressor(pomdp, sampler, C(1; k=40))
-            @test_nowarn test_compressor(pomdp, sampler, C(2; k=40))
+            @test_nowarn test_compressor(pomdp, sampler, C(1; k=15))
+            @test_nowarn test_compressor(pomdp, sampler, C(2; k=15))
         end
     end
     @testset "Flux Compressors" begin

@@ -13,10 +13,9 @@ makedocs(
     format = Documenter.HTML(),
     modules = [CompressedBeliefMDPs],
     pages = [
-        "Samplers" => "samplers.md",
-        "Compressors" => "compressors.md",
-        "CompressedBeliefMDP" => "cbmdp.md",
-        "Base Solvers" => "solvers.md",
+        "CompressedBeliefMDPs.jl" => "index.md",
+        "Implemented Samplers" => "samplers.md",
+        "Implemented Compressors" => "compressors.md",
         "API Documentation" => "api.md"
         # "Subsection" => [
         #     ...
