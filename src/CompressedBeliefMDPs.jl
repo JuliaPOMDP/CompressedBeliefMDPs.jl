@@ -2,8 +2,7 @@ module CompressedBeliefMDPs
 
 using Infiltrator
 
-using POMDPs
-using POMDPTools
+using POMDPs, POMDPTools, POMDPModels
 using ParticleFilters
 using LocalApproximationValueIteration
 using LocalFunctionApproximation
