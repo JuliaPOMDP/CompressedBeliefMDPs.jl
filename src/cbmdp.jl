@@ -82,6 +82,8 @@ POMDPs.actionindex(m::CompressedBeliefMDP, a) = actionindex(m.bmdp.pomdp, a)
 POMDPs.isterminal(m::CompressedBeliefMDP, b̃) = isterminal(m.bmdp, decode(m, b̃))
 POMDPs.discount(m::CompressedBeliefMDP) = discount(m.bmdp)
 
+
+### Convenience Methods ###
 POMDPs.convert_s(t::Type, s, m::CompressedBeliefMDP) = convert_s(t, s, m.bmdp.pomdp)
 POMDPs.convert_s(t::Type{<:AbstractArray}, s::AbstractArray, m::CompressedBeliefMDP) = convert_s(t, s, m.bmdp.pomdp)  # NOTE: this second implementation is b/c to get around a requirement from POMDPLinter
 
@@ -90,3 +92,5 @@ ExplicitDistribution = Union{SparseCat, BoolDistribution, Deterministic, Uniform
 POMDPs.convert_s(::Type{<:AbstractArray}, s::ExplicitDistribution, m::POMDP) = [pdf(s, x) for x in states(m)]
 POMDPs.convert_s(::Type{V}, s::DiscreteBelief, p::POMDP) where V<:AbstractArray = s.b
 POMDPs.convert_s(::Type{<:AbstractArray}, s::ParticleCollection, p::POMDP) = weights(s)
+
+POMDPs.reward(::TMaze, ::TerminalState, ::Int64) = 0

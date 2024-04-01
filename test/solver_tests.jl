@@ -1,7 +1,7 @@
 @testset "Solver/Sampler Tests" begin
     compressor = PCACompressor(1)
     @testset "Discrete S, A, O" begin
-        @testset "$pomdp" for pomdp in (BabyPOMDP(), TigerPOMDP())  # NOTE: TMaze doesn't work b/c we don't define behavior for terminal states ourselves; this is expected behavior
+        @testset "$pomdp" for pomdp in (BabyPOMDP(), TigerPOMDP(), TMaze(6, 0.99))
             @test_nowarn test_solver(CompressedBeliefSolver(pomdp; sampler=PolicySampler(pomdp)), pomdp)
             @test_nowarn test_solver(CompressedBeliefSolver(pomdp; sampler=ExplorationPolicySampler(pomdp)), pomdp)
             @test_nowarn test_solver(CompressedBeliefSolver(pomdp; sampler=BeliefExpansionSampler(pomdp)), pomdp)

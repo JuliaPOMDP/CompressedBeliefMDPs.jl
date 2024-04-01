@@ -46,10 +46,23 @@ function PolicySampler(
 end
 
 function (s::PolicySampler)(pomdp::POMDP)
+    B = []
     mdp = GenerativeBeliefMDP(pomdp, s.updater)
-    iter = stepthrough(mdp, s.policy, "s", rng=s.rng; max_steps=s.n)
-    B = collect(Iterators.take(Iterators.cycle(iter), s.n))
-    return unique!(B)
+    while true
+        b = initialstate(mdp).val
+        for _ in 1:s.n
+            if length(B) == s.n
+                return unique!(B)
+            end
+            if isterminal(mdp.pomdp, rand(s.rng, b))
+                break
+            end
+            a = action(s.policy, mdp)
+            b = @gen(:sp)(mdp, b, a, s.rng)
+            push!(B, b)
+        end
+    end
+    return B
 end
 
 """
@@ -113,8 +126,7 @@ function (s::ExplorationPolicySampler)(pomdp::POMDP)
             if length(B) == s.n
                 return unique!(B)
             end
-
-            if isterminal(mdp, b)
+            if isterminal(mdp.pomdp, rand(s.rng, b))
                 break
             end
             a = action(s.explorer, s.on_policy, k, b)
