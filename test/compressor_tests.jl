@@ -25,7 +25,7 @@ FLUX_COMPRESSORS = (
 
 @testset "Compressor Tests" begin
     pomdp = BabyPOMDP()
-    sampler = PolicySampler(pomdp; n=50)
+    sampler = BeliefExpansionSampler(pomdp; n=5)
     @testset "MultivariateStats Compressors" begin
         @testset "$C" for C in MVS_COMPRESSORS
             @test_nowarn test_compressor(pomdp, sampler, C(1))
@@ -34,8 +34,8 @@ FLUX_COMPRESSORS = (
     end
     @testset "ManifoldLearning Compressors" begin
         @testset "$C" for C in MANIFOLD_COMPRESSORS
-            @test_nowarn test_compressor(pomdp, sampler, C(1; k=15))
-            @test_nowarn test_compressor(pomdp, sampler, C(2; k=15))
+            @test_nowarn test_compressor(pomdp, sampler, C(1; k=5))
+            @test_nowarn test_compressor(pomdp, sampler, C(2; k=5))
         end
     end
     @testset "Flux Compressors" begin

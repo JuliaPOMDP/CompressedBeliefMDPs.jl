@@ -19,6 +19,9 @@ pkg> add CompressedBeliefMDPs
 Using belief compression is easy. Simplify pick a `Sampler`, `Compressor`, and a base `Policy` and then use the standard POMDPs.jl interface.
 
 ```julia
+using POMDPs, POMDPTools, POMDPModels
+using CompressedBeliefMDPs
+
 pomdp = BabyPOMDP()
 compressor = PCACompressor(1)
 updater = DiscreteUpdater(pomdp)
