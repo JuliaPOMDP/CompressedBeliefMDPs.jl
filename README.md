@@ -42,3 +42,51 @@ solver = CompressedBeliefSolver(
 policy = solve(solver, pomdp)
 ```
 
+### Continuous Example
+
+This example demonstrates using CompressedBeliefMDP in a continuous setting with the `LightDark1D` POMDP. It combines particle filters for belief updating and Monte Carlo Tree Search (MCTS) as the solver. While compressing a 1D space is trivial toy problem, this architecture can be easily scaled to larger POMDPs with continuous state and action spaces.
+
+```julia
+using POMDPs, POMDPModels, POMDPTools
+using ParticleFilters
+using MCTS
+using CompressedBeliefMDPs
+
+pomdp = LightDark1D()
+pomdp.movement_cost = 1
+base_solver = MCTSSolver(n_iterations=10, depth=50, exploration_constant=5.0)
+updater = BootstrapFilter(pomdp, 100)
+solver = CompressedBeliefSolver(
+    pomdp,
+    base_solver;
+    updater=updater,
+    sampler=PolicySampler(pomdp; updater=updater)
+)
+policy = solve(solver, pomdp)
+rs = RolloutSimulator(max_steps=50)
+r = simulate(rs, pomdp, policy)
+```
+
+### Large Example
+
+In this example, we tackle a more realistic scenario with the TMaze POMDP, which has 123 states. To handle the larger state space efficiently, we employ a variational auto-encoder (VAE) to compress the belief simplex. By leveraging the VAE's ability to learn a compact representation of the belief state, we focus computational power on the relevant (compressed) belief states during each Bellman update.
+
+```julia
+using POMDPs, POMDPModels, POMDPTools
+using CompressedBeliefMDPs
+
+pomdp = TMaze(60, 0.9)
+solver = CompressedBeliefSolver(
+    pomdp;
+    compressor=VAECompressor(123, 6; hidden_dim=10, verbose=true, epochs=2),
+    sampler=PolicySampler(pomdp, n=500),
+    verbose=true, 
+    max_iterations=1000, 
+    n_generative_samples=30,
+    k=2
+)
+policy = solve(solver, pomdp)
+rs = RolloutSimulator(max_steps=50)
+r = simulate(rs, pomdp, policy)
+```
+

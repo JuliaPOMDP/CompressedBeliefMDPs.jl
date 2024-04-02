@@ -110,7 +110,6 @@ function CompressedBeliefSolver(
     return CompressedBeliefSolver(m, base_solver)
 end
 
-# TODO: add seeding
 function CompressedBeliefSolver(
     pomdp::POMDP;
     updater::Updater=DiscreteUpdater(pomdp),
