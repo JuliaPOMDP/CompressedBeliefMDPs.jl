@@ -2,47 +2,44 @@
 
 [![Build Status](https://github.com/FlyingWorkshop/CompressedBeliefMDPs.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/FlyingWorkshop/CompressedBeliefMDPs.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Dev-Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://flyingworkshop.github.io/CompressedBeliefMDPs.jl/dev/)
+# CompressedBeliefMDPs.jl
 
-CompressedBeliefMDP.jl provides a simple interface for solving large POMDPs with sparse belief spaces.
+## Introduction
 
-# Installation
+Welcome to CompressedBeliefMDPs.jl! This package is part of the [POMDPs.jl](https://juliapomdp.github.io/POMDPs.jl/latest/) ecosystem and takes inspiration from [Exponential Family PCA for Belief Compression in POMDPs](https://papers.nips.cc/paper_files/paper/2002/hash/a11f9e533f28593768ebf87075ab34f2-Abstract.html). 
+
+This package provides a general framework for applying belief compression in large POMDPs with generic compression, sampling, and planning algorithms.
+
+## Installation
+
+You can install CompressedBeliefMDPs.jl using Julia's package manager. Open the Julia REPL (press `]` to enter the package manager mode) and run the following command:
+
+```julia-repl
+pkg> add CompressedBeliefMDPs
 ```
-add CompressedBeliefMDPs
-```
 
-# Quickstart
+## Quickstart
 
-CompressedBeliefMDPs.jl is compatible with the [POMDPs.jl](https://juliapomdp.github.io/POMDPs.jl/latest/) ecosystem.
+Using belief compression is easy. Simplify pick a `Sampler`, `Compressor`, and a base `Policy` and then use the standard POMDPs.jl interface.
+
 ```julia
-using POMDPs, POMDPModels
+using POMDPs, POMDPTools, POMDPModels
 using CompressedBeliefMDPs
 
 pomdp = BabyPOMDP()
-solver = CompressedBeliefSolver(pomdp)
-policy = POMDPs.solve(solver, pomdp)
-s = initialstate(pomdp)
-v = value(policy, s)
-a = action(policy, s)
+compressor = PCACompressor(1)
+updater = DiscreteUpdater(pomdp)
+sampler = BeliefExpansionSampler(pomdp)
+solver = CompressedBeliefSolver(
+    pomdp;
+    compressor=compressor,
+    sampler=sampler,
+    updater=updater,
+    verbose=true, 
+    max_iterations=100, 
+    n_generative_samples=50, 
+    k=2
+)
+policy = solve(solver, pomdp)
 ```
 
-The solver finds an _approximate_ policy for the POMDP.
-
-```julia
-v = value(policy, s)
-a = action(policy, s)
-```
-# Sampling
-
-There are two ways to collect belief samples: belief expansion or policy rollouts.
-
-## Belief Expansion
-
-CompressedBeliefMDPs.jl implements a fast version of exploratory belief expansion (Algorithm 21.13 from [Algorithms for Decision Making](https://algorithmsbook.com/)) that uses [$k$-d trees](https://en.wikipedia.org/wiki/K-d_tree) from [NearestNeighbors.jl](https://github.com/KristofferC/NearestNeighbors.jl). Belief expansion is supported for POMDPs with finite state, action, and observation spaces.
-
-## Policy Rollouts 
-
-
-
-# Compressors
-
-As a convenience, we provide several wrappers for compression schemes from [MultivariateStats.jl](https://juliastats.org/MultivariateStats.jl/stable/) and [ManifoldLearning.jl](https://wildart.github.io/ManifoldLearning.jl/stable/).
