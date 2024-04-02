@@ -21,6 +21,7 @@ MANIFOLD_COMPRESSORS = (
 
 FLUX_COMPRESSORS = (
     AutoencoderCompressor,
+    VAECompressor
 )
 
 @testset "Compressor Tests" begin

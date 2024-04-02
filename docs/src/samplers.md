@@ -1,7 +1,7 @@
 # Implemented Sampler
 
 CompressedBeliefMDPs provides the following generic belief samplers:
-- a exploratory belief expansion sampler
+- an exploratory belief expansion sampler
 - a [Policy](https://juliapomdp.github.io/POMDPs.jl/latest/api/#POMDPs.Policy) rollout sampler
 - an [ExplorationPolicy](https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/policies/#Exploration-Policies) rollout sampler
 

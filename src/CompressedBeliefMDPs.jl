@@ -30,11 +30,14 @@ export
     ManifoldCompressor,
     IsomapCompressor,
     ### Flux compressors ###
-    AutoencoderCompressor
+    AutoencoderCompressor,
+    VAECompressor
 include("compressors/compressor.jl")
 include("compressors/mvs_compressors.jl")
 include("compressors/manifold_compressors.jl")
 include("compressors/autoencoders.jl")
+include("compressors/vae.jl")
+
 
 export
     Sampler,

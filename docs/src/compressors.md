@@ -7,6 +7,7 @@ CompressedBeliefMDPs currently provides wrappers for the following compression t
 - a factor analysis compressor,
 - an isomap compressor,
 - an autoencoder compressor
+- a variational auto-encoder (VAE) compressor
 
 ## Principal Component Analysis (PCA)
 ```@docs 
@@ -29,9 +30,18 @@ FactorAnalysisCompressor
 ```
 
 ## Isomap
-
 ```@docs
 IsomapCompressor
+```
+
+## Autoencoder
+```@docs
+AutoencoderCompressor
+```
+
+### Variational Auto-Encoder (VAE)
+```@docs
+VAECompressor
 ```
 
 !!! warning 
