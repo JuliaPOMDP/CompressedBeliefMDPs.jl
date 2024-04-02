@@ -92,7 +92,7 @@ r = simulate(rs, pomdp, policy)
 
 ### Large Example
 
-In this example, we tackle a more realistic scenario with the TMaze POMDP, which has 123 states. To handle the larger state space efficiently, we employ a variational auto-encoder (VAE) to compress the belief simplex. By leveraging the VAE's ability to learn a compact representation of the belief state, we focus computational power on the relevant (compressed) belief states during each Bellman update.
+In this example, we tackle a more realistic scenario with the TMaze POMDP, which has 123 states. To handle the larger state space efficiently, we employ a variational auto-encoder (VAE) to compress the belief simplex. By leveraging the VAE's ability to learn a compact representation of the belief state, we focus computational power on the relevant compressed belief states during each Bellman update.
 
 ```julia
 using POMDPs, POMDPModels, POMDPTools
