@@ -1,7 +1,7 @@
 # CompressedBeliefMDPs
 
-[![Build Status](https://github.com/FlyingWorkshop/CompressedBeliefMDPs.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/FlyingWorkshop/CompressedBeliefMDPs.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Dev-Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://flyingworkshop.github.io/CompressedBeliefMDPs.jl/dev/)
+[![Build Status](https://github.com/JuliaPOMDP/CompressedBeliefMDPs.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/JuliaPOMDP/CompressedBeliefMDPs.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Dev-Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaPOMDP.github.io/CompressedBeliefMDPs.jl/dev/)
 
 ## Introduction
 
