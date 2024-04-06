@@ -57,7 +57,7 @@ function (s::PolicySampler)(pomdp::POMDP)
             if isterminal(mdp.pomdp, rand(s.rng, b))
                 break
             end
-            a = action(s.policy, mdp)
+            a = action(s.policy, b)
             b = @gen(:sp)(mdp, b, a, s.rng)
             push!(B, b)
         end
