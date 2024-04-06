@@ -48,14 +48,6 @@ jobs:
             ${{ runner.os }}-      
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
-  coverage:
-    name: Upload coverage reports to Codecov
-    runs-on: ubuntu-latest
-    steps:
-      - uses: codecov/codecov-action@v4.0.1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: JuliaPOMDP/CompressedBeliefMDPs.jl
   docs:
     name: Documentation
     runs-on: ubuntu-latest
