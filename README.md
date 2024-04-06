@@ -4,6 +4,8 @@ NOTE: WIP; package registration and publication to follow shortly.
 
 [![Build Status](https://github.com/JuliaPOMDP/CompressedBeliefMDPs.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/JuliaPOMDP/CompressedBeliefMDPs.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Dev-Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaPOMDP.github.io/CompressedBeliefMDPs.jl/dev/)
+[![codecov](https://codecov.io/gh/JuliaPOMDP/CompressedBeliefMDPs.jl/branch/master/graph/badge.svg?token=xPLiTP3IVt)](https://codecov.io/gh/JuliaPOMDP/CompressedBeliefMDPs.jl)
+
 
 ## Introduction
 
