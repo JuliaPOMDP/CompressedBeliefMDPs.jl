@@ -29,5 +29,5 @@ makedocs(
 # Documenter can also automatically deploy documentation to gh-pages.
 # See "Hosting Documentation" and deploydocs() in the Documenter manual
 deploydocs(
-    repo = "github.com/FlyingWorkshop/CompressedBeliefMDPs.jl.git",
+    repo = "github.com/JuliaPOMDP/CompressedBeliefMDPs.jl.git",
 )

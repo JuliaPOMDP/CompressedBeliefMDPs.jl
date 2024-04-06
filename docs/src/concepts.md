@@ -8,4 +8,4 @@ CompressedBeliefMDPs.jl aims to implement a generalization of the [belief compre
 
 Each step is handled by `Sampler`, `Compressor`, `CompressedBeliefMDP`, and `CompressedBeliefSolver` respectively.
 
-For more details, please see the rest of the documentation or the [associated paper](../../paper.md).
+For more details, please see the rest of the documentation or the associated paper.
