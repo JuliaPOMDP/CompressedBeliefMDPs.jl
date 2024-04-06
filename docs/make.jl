@@ -14,7 +14,10 @@ makedocs(
     modules = [CompressedBeliefMDPs],
     pages = [
         "CompressedBeliefMDPs.jl" => "index.md",
+        "Concepts and Architecture" => "concepts.md",
+        "Defining a Sampler" => "sampler_interface.md",
         "Implemented Samplers" => "samplers.md",
+        "Defining a Compressor" => "compressor_interface.md",
         "Implemented Compressors" => "compressors.md",
         "API Documentation" => "api.md"
         # "Subsection" => [
