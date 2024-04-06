@@ -7,7 +7,6 @@ using ParticleFilters
 using LocalApproximationValueIteration
 using LocalFunctionApproximation
 
-import Lazy: @forward
 using Bijections
 using NearestNeighbors
 using StaticArrays
@@ -25,7 +24,6 @@ export
     KernelPCACompressor,
     PPCACompressor,
     FactorAnalysisCompressor,
-    # MDSCompressor,
     ### ManifoldLearning wrappers ###
     ManifoldCompressor,
     IsomapCompressor,

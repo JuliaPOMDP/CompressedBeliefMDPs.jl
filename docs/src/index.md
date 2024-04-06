@@ -89,6 +89,9 @@ rs = RolloutSimulator(max_steps=50)
 r = simulate(rs, pomdp, policy)
 ```
 
+> **Note:** We use MCTS here as a proof of concept that CompressedBeliefMDPs can handle continuous state and action spaces. In reality, belief compression has no effect on MCTS with double progressive widening. If you want to solve continuous POMDPs, we suggest implementing a custom solver or looking into [Crux.jl](https://www.google.com/search?q=crux.jl&oq=cru&gs_lcrp=EgZjaHJvbWUqDggAEEUYJxg7GIAEGIoFMg4IABBFGCcYOxiABBiKBTIGCAEQRRhAMgYIAhBFGDkyDAgDEAAYQxiABBiKBTIGCAQQRRg8MgYIBRBFGDwyBggGEEUYPDIGCAcQRRhB0gEHNzY1ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8).
+
+
 ### Large Example
 
 In this example, we tackle a more realistic scenario with the TMaze POMDP, which has 123 states. To handle the larger state space efficiently, we employ a variational auto-encoder (VAE) to compress the belief simplex. By leveraging the VAE's ability to learn a compact representation of the belief state, we focus computational power on the relevant compressed belief states during each Bellman update.
