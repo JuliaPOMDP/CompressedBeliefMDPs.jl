@@ -17,6 +17,7 @@ end
 # functor definition
 function (c::MyCompressor)(beliefs)
     # YOUR CODE HERE
+    return compressed_beliefs
 end
 
 function fit!(c::MyCompressor, beliefs)

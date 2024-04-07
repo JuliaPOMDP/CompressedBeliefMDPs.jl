@@ -17,6 +17,7 @@ end
 # functor definition
 function (c::MySampler)(pomdp::POMDP)
     # YOUR CODE HERE
+    return sampled_beliefs
 end
 ```
 
