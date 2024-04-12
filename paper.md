@@ -50,7 +50,7 @@ CompressedBeliefMDPs.jl abstracts the belief compression algorithm in @Roy into 
 3. construct the compressed belief-state MDP, and
 4. solve using an MDP solver.
 
-In our package, each step is handled by a struct or abstract type. Step 1\. is handled by the `Sampler` abstract type; step 2\. by the `Compressor` abstract type; step 3\. by the `CompressedBeliefMDP` struct; and step 4\. by the `CompressedBeliefSolver` and `CompressedBeliefPolicy` structs.
+In our package, each step is handled by a struct or abstract type. Step (1) is handled by the `Sampler` abstract type; step (2) by the `Compressor` abstract type; step (3) by the `CompressedBeliefMDP` struct; and step (4) by the `CompressedBeliefSolver` and `CompressedBeliefPolicy` structs.
 
 [^2]: @Roy use a specific sampler, compressor, and solver. They use a heuristic controller for sampling beliefs; exponential family principal component analysis with Poisson loss for compression [@EPCA]; and local approximation value iteration for the base solver. @Roy does not explore how belief compression might generalize with alternative techniques.
 
@@ -71,7 +71,7 @@ CompressedBeliefMDPs.jl also supports fast exploratory belief expansion [@AFDM] 
 The `Compressor` abstract type handles compression in CompressedBeliefMDPs.jl. CompressedBeliefMDPs.jl provides seven off-the-shelf compressors:
 
 1. principal component analysis (PCA) [@PCA],
-2. kernel PCA [@kernalPCA],
+2. kernel PCA [@kernelPCA],
 3. probabilistic PCA [@PPCA],
 4. factor analysis [@factor],
 5. Isomap [@isomap],
@@ -86,11 +86,11 @@ The first four are supported through [MultivariateState.jl](https://juliastats.o
 
 Before we discuss *compressed* belief-state MDPs, its relevant to understand vanilla belief-state MDPs.
 
-Any POMDP can be viewed as a belief-state MDP [@belief-state-MDP] where each state is a belief and transitions are defined with belief updates (e.g., Bayesian or Kalman filters). Formally, a POMDP $\langle S, A, T, R, \Omega, O, \gamma \rangle$—with $S$ being the state space, $A$ the action space, $T: S \times A \times S \to \mathbb{R}$ the transition model, $R: S \times A \to \mathbb{R}$ the reward moel, $\Omega$ the observation space, $O: \Omega \times S \times A \to \mathbb{R}$ the observation model, and $\gamma \in [0, 1)$ the discount factor—induces the belief-state MDP $\langle B, A, T', R', \gamma \rangle$ where $B$ is the POMDP belief space, $T': B \times A \times B \to \mathbb{R}$ the belief update model, and $R': B \times A \to \mathbb{R}$ the reward model ($A$ and $\gamma$ are identical).
+Any POMDP can be viewed as a belief-state MDP [@belief-state-MDP] where each state is a belief and transitions are defined with belief updates (e.g., Bayesian or Kalman filters). Formally, a POMDP $\langle S, A, T, R, \Omega, O, \gamma \rangle$—with $S$ being the state space, $A$ the action space, $T: S \times A \times S \to \mathbb{R}$ the transition model, $R: S \times A \to \mathbb{R}$ the reward moel, $\Omega$ the observation space, $O: \Omega \times S \times A \to \mathbb{R}$ the observation model, and $\gamma \in [0, 1)$ the discount factor—is said to induce the belief-state MDP $\langle B, A, T', R', \gamma \rangle$ where $B$ is the POMDP belief space, $T': B \times A \times B \to \mathbb{R}$ the belief update model, and $R': B \times A \to \mathbb{R}$ the reward model ($A$ and $\gamma$ are identical).
 
 We define the corresponding *compressed belief-state MDP* as $\langle \tilde{B}, A, \tilde{T}, \tilde{R}, \gamma \rangle$ where $\tilde{B}$ is the compressed belief space obtained from the compression $\phi: B \to \tilde{B}$. Then $\tilde{R}(\tilde{b}, a) = R(\phi^{-1}(\tilde{b}), a)$ and $\tilde{T}(\tilde{b}, a, \tilde{b}') = T(\phi^{-1}(\tilde{b}), a, \phi^{-1}(\tilde{b}'))$.[^4]
 
-[^4]: Here $\phi^{-1}$ is a mild abuse of notation. Of course, $\phi$ in general is not lossless, so $\phi^{-1}$ may not be truly invertible. In practice, we circumvent this issue by caching compressions on a first-come-first-serve base (or under an arbitrary ranking of $b \in B$ if the compression is parallel), so that if $\phi(b_1) = \phi(b_2) = \tilde{b}$ we have $\phi^{-1}(\tilde{b}) = b_1$ if $b_1$ was ranked higher than $b_2$.
+[^4]: Here $\phi^{-1}$ is a mild abuse of notation. Of course, $\phi$ in general is not lossless, so $\phi^{-1}$ may not be truly invertible. In practice, we circumvent this issue by caching compressions on a first-come-first-serve basis (or under an arbitrary ranking over $B$ if the compression is parallel), so that if $\phi(b_1) = \phi(b_2) = \tilde{b}$ we have $\phi^{-1}(\tilde{b}) = b_1$ if $b_1$ was ranked higher than $b_2$ for $b_1, b_2 \in B$ and $\tilde{b} \in \tilde{B}$.
 
 ## Implementation
 
