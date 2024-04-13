@@ -19,7 +19,7 @@ authors:
 affiliations:
  - name: Stanford University
    index: 1
-date: 11 April 2024
+date: 13 April 2024
 bibliography: paper.bib
 ---
 
@@ -37,22 +37,18 @@ CompressedBeliefMDPs.jl is a Julia package [@Julia] for solving large POMDPs in 
 
 ### Other Methods for Solving Large POMDPs
 
-While traditional tabular methods like policy and value iteration scale poorly on real-world POMDPs, there is a well-stocked arsenal of more modern techniques that are effective at solving large-scale POMDPs like point-based methods [@PBVI; @perseus; @hsvi; @SARSOP] and online planners [@AEMS; @despot; @mcts; @pomcp; @sunberg2018online]. Belief compression is an effective but unfortunately overlooked technique that is particularly powerful in the common real-world case that belief is compressed or sparse.[^1] One of the primary goals of CompressedBeliefMDPs.jl is to make benchmarking and exploring belief compression easier, so that it can be studied further.
-
-[^1]: To see why concentrated belief is common, consider a robot navigation task. A robot has an imperfect measurement of its true position which we model with a Gaussian distribution. Sparse belief is also common (e.g., in poker there are many possible states, but fewer believable states at any given timestep).
+While traditional tabular methods like policy and value iteration scale poorly on real-world POMDPs, there are many modern techniques that are effective at solving large-scale POMDPs like point-based methods [@PBVI; @perseus; @hsvi; @SARSOP] and online planners [@AEMS; @despot; @mcts; @pomcp; @sunberg2018online]. Belief compression can be an effective but often overlooked technique that allows for generalization across the belief space when planning. One of the primary goals of CompressedBeliefMDPs.jl is to make benchmarking and exploring belief compression easier, so that it can be studied further.
 
 ### Belief Compression
 
-CompressedBeliefMDPs.jl abstracts the belief compression algorithm in @Roy into four basic steps:[^2] 
+CompressedBeliefMDPs.jl abstracts the belief compression algorithm of @Roy into four basic steps:
 
 1. sample reachable beliefs,
 2. compress the samples,
 3. construct the compressed belief-state MDP, and
 4. solve using an MDP solver.
 
-In our package, each step is handled by a struct or abstract type. Step (1) is handled by the `Sampler` abstract type; step (2) by the `Compressor` abstract type; step (3) by the `CompressedBeliefMDP` struct; and step (4) by the `CompressedBeliefSolver` and `CompressedBeliefPolicy` structs.
-
-[^2]: @Roy use a specific sampler, compressor, and solver. They use a heuristic controller for sampling beliefs; exponential family principal component analysis with Poisson loss for compression [@EPCA]; and local approximation value iteration for the base solver. @Roy does not explore how belief compression might generalize with alternative techniques.
+In our package, each step is handled by a struct or abstract type. Step (1) is handled by the `Sampler` abstract type; step (2) by the `Compressor` abstract type; step (3) by the `CompressedBeliefMDP` struct; and step (4) by the `CompressedBeliefSolver` and `CompressedBeliefPolicy` structs. In contrast, @Roy use a specific sampler, compressor, and solver. They use a heuristic controller for sampling beliefs; exponential family principal component analysis with Poisson loss for compression [@EPCA]; and local approximation value iteration for the base solver. @Roy does not explore how belief compression might generalize with alternative techniques.
 
 ### Related Packages
 
@@ -62,9 +58,7 @@ As far as we are aware, no prior Julia or Python package implements POMDP belief
 
 The `Sampler` abstract type handles sampling in CompressedBeliefMDPs.jl. CompressedBeliefMDPs.jl supports sampling with policy rollouts through `PolicySampler` and `ExplorationSampler` which wrap `Policy` and `ExplorationPolicy` from POMDPs.jl respectively. You can use these objects if you want to collect beliefs with a random or $\epsilon$-greedy policy for instance. 
 
-CompressedBeliefMDPs.jl also supports fast exploratory belief expansion [@AFDM] on POMDPs with discrete state, action, and observation spaces.[^3]
-
-[^3]: Our implementation of exploratory belief expansion is an adaptation of Algorithm 21.13 in @AFDM. We use $k$-d trees [@kd-trees] to efficiently find the furthest belief sample.
+CompressedBeliefMDPs.jl also supports fast exploratory belief expansion on POMDPs with discrete state, action, and observation spaces. Our implementation is an adaptation of Algorithm 21.13 in @AFDM. We use $k$-d trees [@kd-trees] to efficiently find the furthest belief sample.
 
 # Compression
 
@@ -84,13 +78,11 @@ The first four are supported through [MultivariateState.jl](https://juliastats.o
 
 ## Definition
 
-Before we discuss *compressed* belief-state MDPs, its relevant to understand vanilla belief-state MDPs.
+Before we discuss *compressed* belief-state MDPs, it is important to understand vanilla belief-state MDPs.
 
 Any POMDP can be viewed as a belief-state MDP [@belief-state-MDP] where each state is a belief and transitions are defined with belief updates (e.g., Bayesian or Kalman filters). Formally, a POMDP $\langle S, A, T, R, \Omega, O, \gamma \rangle$—with $S$ being the state space, $A$ the action space, $T: S \times A \times S \to \mathbb{R}$ the transition model, $R: S \times A \to \mathbb{R}$ the reward moel, $\Omega$ the observation space, $O: \Omega \times S \times A \to \mathbb{R}$ the observation model, and $\gamma \in [0, 1)$ the discount factor—is said to induce the belief-state MDP $\langle B, A, T', R', \gamma \rangle$ where $B$ is the POMDP belief space, $T': B \times A \times B \to \mathbb{R}$ the belief update model, and $R': B \times A \to \mathbb{R}$ the reward model ($A$ and $\gamma$ are identical).
 
-We define the corresponding *compressed belief-state MDP* as $\langle \tilde{B}, A, \tilde{T}, \tilde{R}, \gamma \rangle$ where $\tilde{B}$ is the compressed belief space obtained from the compression $\phi: B \to \tilde{B}$. Then $\tilde{R}(\tilde{b}, a) = R(\phi^{-1}(\tilde{b}), a)$ and $\tilde{T}(\tilde{b}, a, \tilde{b}') = T(\phi^{-1}(\tilde{b}), a, \phi^{-1}(\tilde{b}'))$.[^4]
-
-[^4]: Here $\phi^{-1}$ is a mild abuse of notation. Of course, $\phi$ in general is not lossless, so $\phi^{-1}$ may not be truly invertible. In practice, we circumvent this issue by caching compressions on a first-come-first-serve basis (or under an arbitrary ranking over $B$ if the compression is parallel), so that if $\phi(b_1) = \phi(b_2) = \tilde{b}$ we have $\phi^{-1}(\tilde{b}) = b_1$ if $b_1$ was ranked higher than $b_2$ for $b_1, b_2 \in B$ and $\tilde{b} \in \tilde{B}$.
+We define the corresponding *compressed belief-state MDP* as $\langle \tilde{B}, A, \tilde{T}, \tilde{R}, \gamma \rangle$ where $\tilde{B}$ is the compressed belief space obtained from the compression $\phi: B \to \tilde{B}$. Then $\tilde{R}(\tilde{b}, a) = R(\phi^{-1}(\tilde{b}), a)$ and $\tilde{T}(\tilde{b}, a, \tilde{b}') = T(\phi^{-1}(\tilde{b}), a, \phi^{-1}(\tilde{b}'))$. When $\phi$ is lossy, $\phi$ may not be invertible. In practice, we circumvent this issue by caching compressions on a first-come-first-serve basis (or under an arbitrary ranking over $B$ if the compression is parallel), so that if $\phi(b_1) = \phi(b_2) = \tilde{b}$ we have $\phi^{-1}(\tilde{b}) = b_1$ if $b_1$ was ranked higher than $b_2$ for $b_1, b_2 \in B$ and $\tilde{b} \in \tilde{B}$.
 
 ## Implementation
 
@@ -136,7 +128,7 @@ v = value(policy, s)
 a = action(policy, s)
 ```
 
-Following @Roy, we use local value approximation as our default base solver because it provides an error bound on our value estimate [@error_bound].[^5]
+Following @Roy, we use local value approximation as our default base solver because it provides an error bound on our value estimate [@error_bound].[^1]
 
 ```julia
 using POMDPs, POMDPTools, POMDPModels
@@ -147,9 +139,9 @@ solver = CompressedBeliefSolver(pomdp)
 policy = solve(solver, pomdp)
 ```
 
-The generality of the base solver in CompressedBeliefMDPs.jl offers a major improvement over belief compression in @Roy because it supports continuous state, action, and observation spaces. More details, examples, and instructions on implementing custom components can be found in the [documentation](https://juliapomdp.github.io/CompressedBeliefMDPs.jl/dev/).
+The generality of the base solver in CompressedBeliefMDPs.jl offers a major improvement over the belief compression of @Roy because it supports continuous state, action, and observation spaces. More details, examples, and instructions on implementing custom components can be found in the [documentation](https://juliapomdp.github.io/CompressedBeliefMDPs.jl/dev/).
 
-[^5]: The value function is no longer guaranteed to be convex over the compressed belief space $\tilde{B}$.
+[^1]: The value function is no longer guaranteed to be convex over the compressed belief space $\tilde{B}$.
 
 # Acknowledgments
 
