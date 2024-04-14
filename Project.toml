@@ -23,6 +23,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 MCTS = "0.5"
+Bijections = "0.1"
 julia = "1"
 
 [extras]
