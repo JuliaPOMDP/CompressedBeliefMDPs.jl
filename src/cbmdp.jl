@@ -38,6 +38,7 @@ struct CompressedBeliefMDP{B, A} <: MDP{B, A}
     ϕ::Bijection  # ϕ: belief ↦ compressor(belief); NOTE: While compressions aren't usually injective, we cache compressed beliefs on a first-come, first-served basis, so the *cache* is effectively bijective.
 end
 
+
 function CompressedBeliefMDP(pomdp::POMDP, updater::Updater, compressor::Compressor)
     # Hack to determine typeof(b̃)
     bmdp = GenerativeBeliefMDP(pomdp, updater)
@@ -49,10 +50,12 @@ function CompressedBeliefMDP(pomdp::POMDP, updater::Updater, compressor::Compres
     return CompressedBeliefMDP{B̃, actiontype(bmdp)}(bmdp, compressor, ϕ)
 end
 
+
 function decode(m::CompressedBeliefMDP, b̃)
     b = m.ϕ(b̃)
     return b
 end
+
 
 function encode(m::CompressedBeliefMDP, b)
     if b ∈ domain(m.ϕ)
@@ -67,6 +70,7 @@ function encode(m::CompressedBeliefMDP, b)
     return b̃
 end
 
+
 function POMDPs.gen(m::CompressedBeliefMDP, b̃, a, rng::Random.AbstractRNG)
     b = decode(m, b̃)
     bp, r = @gen(:sp, :r)(m.bmdp, b, a, rng)
@@ -74,23 +78,81 @@ function POMDPs.gen(m::CompressedBeliefMDP, b̃, a, rng::Random.AbstractRNG)
     return (sp=b̃p, r=r)
 end
 
-POMDPs.states(m::CompressedBeliefMDP) = [encode(m, initialize_belief(m.bmdp.updater, s)) for s in states(m.bmdp.pomdp)]
-POMDPs.initialstate(m::CompressedBeliefMDP) = encode(m, initialstate(m.bmdp))
-POMDPs.actions(m::CompressedBeliefMDP, b̃) = actions(m.bmdp, decode(m, b̃))
-POMDPs.actions(m::CompressedBeliefMDP) = actions(m.bmdp)
-POMDPs.actionindex(m::CompressedBeliefMDP, a) = actionindex(m.bmdp.pomdp, a)
-POMDPs.isterminal(m::CompressedBeliefMDP, b̃) = isterminal(m.bmdp, decode(m, b̃))
-POMDPs.discount(m::CompressedBeliefMDP) = discount(m.bmdp)
 
+function POMDPs.states(m::CompressedBeliefMDP)
+    belief_states = []
+    for s in states(m.bmdp.pomdp)
+        belief = initialize_belief(m.bmdp.updater, s)
+        encoded_belief = encode(m, belief)
+        push!(belief_states, encoded_belief)
+    end
+    return belief_states
+end
+
+
+function POMDPs.initialstate(m::CompressedBeliefMDP)
+    initial_state_belief = initialstate(m.bmdp)
+    encoded_initial_state_belief = encode(m, initial_state_belief)
+    return encoded_initial_state_belief
+end
+
+
+function POMDPs.actions(m::CompressedBeliefMDP, b̃)
+    decoded_belief = decode(m, b̃)
+    available_actions = actions(m.bmdp, decoded_belief)
+    return available_actions
+end
+
+
+function POMDPs.actions(m::CompressedBeliefMDP)
+    return actions(m.bmdp)
+end
+
+
+function POMDPs.actionindex(m::CompressedBeliefMDP, a)
+    return actionindex(m.bmdp.pomdp, a)
+end
+
+
+function POMDPs.isterminal(m::CompressedBeliefMDP, b̃)
+    decoded_belief = decode(m, b̃)
+    return isterminal(m.bmdp, decoded_belief)
+end
+
+
+function POMDPs.discount(m::CompressedBeliefMDP)
+    return discount(m.bmdp)
+end
 
 ### Convenience Methods ###
-POMDPs.convert_s(t::Type, s, m::CompressedBeliefMDP) = convert_s(t, s, m.bmdp.pomdp)
-POMDPs.convert_s(t::Type{<:AbstractArray}, s::AbstractArray, m::CompressedBeliefMDP) = convert_s(t, s, m.bmdp.pomdp)  # NOTE: this second implementation is b/c to get around a requirement from POMDPLinter
+function POMDPs.convert_s(t::Type, s, m::CompressedBeliefMDP)
+    return convert_s(t, s, m.bmdp.pomdp)
+end
+
+
+function POMDPs.convert_s(t::Type{<:AbstractArray}, s::AbstractArray, m::CompressedBeliefMDP)
+    return convert_s(t, s, m.bmdp.pomdp)
+end
+
 
 # TODO: maybe exclude include sparsecat; e.g., for sparsecat do [pdf(s, x) for x in support(s)]
 ExplicitDistribution = Union{SparseCat, BoolDistribution, Deterministic, Uniform}  # distributions w/ explicit PDFs from POMDPs.jl (https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/distributions/#Implemented-Distributions)
-POMDPs.convert_s(::Type{<:AbstractArray}, s::ExplicitDistribution, m::POMDP) = [pdf(s, x) for x in states(m)]
-POMDPs.convert_s(::Type{V}, s::DiscreteBelief, p::POMDP) where V<:AbstractArray = s.b
-POMDPs.convert_s(::Type{<:AbstractArray}, s::ParticleCollection, p::POMDP) = weights(s)
 
-POMDPs.reward(::TMaze, ::TerminalState, ::Int64) = 0
+function POMDPs.convert_s(::Type{<:AbstractArray}, s::ExplicitDistribution, m::POMDP)
+    return [pdf(s, x) for x in states(m)]
+end
+
+
+function POMDPs.convert_s(::Type{V}, s::DiscreteBelief, p::POMDP) where V<:AbstractArray
+    return s.b
+end
+
+
+function POMDPs.convert_s(::Type{<:AbstractArray}, s::ParticleCollection, p::POMDP)
+    return weights(s)
+end
+
+
+function POMDPs.reward(::TMaze, ::TerminalState, ::Int64)
+    return 0
+end
