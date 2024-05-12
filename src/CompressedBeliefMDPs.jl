@@ -1,6 +1,7 @@
 module CompressedBeliefMDPs
 
 using POMDPs, POMDPTools, POMDPModels
+using QuickPOMDPs
 using ParticleFilters
 using LocalApproximationValueIteration
 using LocalFunctionApproximation
