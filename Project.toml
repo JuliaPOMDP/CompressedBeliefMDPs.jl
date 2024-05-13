@@ -6,6 +6,7 @@ version = "1.0.0"
 [deps]
 Bijections = "e2ed5e7c-b2de-5872-ae92-c73ca462fb04"
 Distances = "b4f34e82-e78d-54a5-968a-f98e89d6e8f7"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 LocalApproximationValueIteration = "a40420fb-f401-52da-a663-f502e5b95060"

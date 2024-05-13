@@ -1,11 +1,13 @@
 module CompressedBeliefMDPs
 
+# Packages from JuliaPOMDPs
 using POMDPs, POMDPTools, POMDPModels
-using QuickPOMDPs
 using ParticleFilters
 using LocalApproximationValueIteration
 using LocalFunctionApproximation
 
+# Other 3P Packages
+using Distributions
 using Bijections
 using NearestNeighbors
 using StaticArrays
