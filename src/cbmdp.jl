@@ -47,12 +47,14 @@ function CompressedBeliefMDP(pomdp::POMDP, updater::Updater, compressor::Compres
     B = typeof(b)
     B̃ = typeof(b̃)
     ϕ = Bijection{B, B̃}()
+    @debug "Created CompressedBeliefMDP with belief type $B and compressed belief type $B̃"
     return CompressedBeliefMDP{B̃, actiontype(bmdp)}(bmdp, compressor, ϕ)
 end
 
 
 function decode(m::CompressedBeliefMDP, b̃)
     b = m.ϕ(b̃)
+    @debug "Decoded compressed belief $b̃ to belief $b"
     return b
 end
 
@@ -60,11 +62,15 @@ end
 function encode(m::CompressedBeliefMDP, b)
     if b ∈ domain(m.ϕ)
         b̃ = m.ϕ[b]
+        @debug "Encoded belief $b to cached compressed belief $b̃"
     else
         b_numerical = convert_s(AbstractArray{Float64}, b, m)
         b̃ = m.compressor(b_numerical)
         if b̃ ∉ image(m.ϕ)
             m.ϕ[b] = b̃
+            @debug "Encoded belief $b to new compressed belief $b̃ and cached it"
+        else
+            @debug "Compressed belief $b̃ already exists in cache, but belief $b is new"
         end
     end
     return b̃
@@ -72,6 +78,7 @@ end
 
 
 function POMDPs.gen(m::CompressedBeliefMDP, b̃, a, rng::Random.AbstractRNG)
+    @debug "Generating next state and reward from compressed belief $b̃ and action $a"
     b = decode(m, b̃)
     bp, r = @gen(:sp, :r)(m.bmdp, b, a, rng)
     b̃p = encode(m, bp)

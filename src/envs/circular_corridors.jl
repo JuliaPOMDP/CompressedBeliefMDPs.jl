@@ -34,8 +34,13 @@ const DECLARE_GOAL = 3
 
 
 function POMDPs.actions(::CircularCorridorPOMDP)
-    actions = LEFT:DECLARE_GOAL
-    return actions
+    A = [
+        LEFT,
+        RIGHT,
+        SENSE_CORRIDOR,
+        DECLARE_GOAL
+    ]
+    return A
 end
 
 
@@ -47,12 +52,20 @@ end
 
 
 function POMDPs.states(p::CircularCorridorPOMDP)
-    return nothing
+    S = []
+    for row in 1:p.num_corridors
+        for index in 1:p.corridor_length
+            state = CircularCorridorState(row, index)
+            push!(S, state)
+        end
+    end
+    return S
 end
 
 
 function POMDPs.stateindex(p::CircularCorridorPOMDP, s::CircularCorridorState)
-    return nothing
+    i = p.corridor_length * s.row + s.index
+    return i
 end
 
 
@@ -85,29 +98,31 @@ end
 
 function POMDPs.transition(p::CircularCorridorsPOMDP, s::CircularCorridorState, a)
     ImplicitDistribution() do rng
-        # if a == DECLARE_GOAL
-        #     sp = TerminalState()
-
-        if a == LEFT
-            μ = abs(s.index - 1) % p.corridor_length
-        elseif a == RIGHT
-            μ = (s.index + 1) % p.corridor_length
+        if a == DECLARE_GOAL
+            sp = TerminalState()
         else
-            μ = s.index
+            if a == LEFT
+                μ = abs(s.index - 1) % p.corridor_length
+            elseif a == RIGHT
+                μ = (s.index + 1) % p.corridor_length
+            else
+                μ = s.index
+            end
+            sample = _sample_distribution(p, rng)
+            index = (μ + sample) % p.corridor_length
+            row = s.row
+            sp = CircularCorridorState(row, index)
         end
-        sample = _sample_distribution(p, rng)
-        index = (μ + sample) % p.corridor_length
-        row = s.row
-        sp = CircularCorridorState(row, index)
         return sp
     end
 end
 
 
-# TODO: define terminal action
-
-
 function POMDPs.reward(p::CircularCorridorPOMDP, s::CircularCorridorState, a)
-    if a == DECLARE_GOAL
-        return s in p.goals
+    if a == DECLARE_GOAL && s in p.goals
+        r = 1
+    else
+        r = 0
+    end
+    return r
 end
