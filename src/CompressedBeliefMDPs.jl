@@ -37,7 +37,6 @@ include("compressors/manifold_compressors.jl")
 include("compressors/autoencoders.jl")
 include("compressors/vae.jl")
 
-
 export
     Sampler,
     sample,
@@ -57,5 +56,10 @@ export
     CompressedBeliefPolicy,
     solve
 include("solver.jl")
+
+export
+    CircularCorridorPOMDP,
+    CircularCorridorState
+include("envs/circular.jl")
 
 end # module CompressedBeliefMDPs
