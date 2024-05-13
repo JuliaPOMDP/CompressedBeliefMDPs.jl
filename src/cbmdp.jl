@@ -136,7 +136,12 @@ end
 
 
 # TODO: maybe exclude include sparsecat; e.g., for sparsecat do [pdf(s, x) for x in support(s)]
-ExplicitDistribution = Union{SparseCat, BoolDistribution, Deterministic, POMDPTools.Uniform}  # distributions w/ explicit PDFs from POMDPs.jl (https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/distributions/#Implemented-Distributions)
+ExplicitDistribution = Union{
+    SparseCat, 
+    BoolDistribution, 
+    Deterministic, 
+    POMDPTools.Uniform
+}  # distributions w/ explicit PDFs from POMDPs.jl (https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/distributions/#Implemented-Distributions)
 
 function POMDPs.convert_s(::Type{<:AbstractArray}, s::ExplicitDistribution, m::POMDP)
     return [pdf(s, x) for x in states(m)]

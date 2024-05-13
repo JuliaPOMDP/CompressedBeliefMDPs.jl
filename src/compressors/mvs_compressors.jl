@@ -29,17 +29,32 @@ end
 # PCA Compressors
 
 """Wrapper for [`MultivariateStats.PCA`](https://juliastats.org/MultivariateStats.jl/stable/pca/#Linear-Principal-Component-Analysis)."""
-PCACompressor(maxoutdim::Integer; kwargs...) = MVSCompressor(maxoutdim, PCA, kwargs)
+function PCACompressor(maxoutdim::Integer; kwargs...)
+    compressor = MVSCompressor(maxoutdim, PCA, kwargs)
+    return compressor
+end
+
 
 """Wrapper for [`MultivariateStats.KernelPCA`](https://juliastats.org/MultivariateStats.jl/stable/pca/#Kernel-Principal-Component-Analysis)."""
-KernelPCACompressor(maxoutdim::Integer; kwargs...) = MVSCompressor(maxoutdim, KernelPCA, kwargs)
+function KernelPCACompressor(maxoutdim::Integer; kwargs...)
+    compressor = MVSCompressor(maxoutdim, KernelPCA, kwargs)
+    return compressor
+end
+
 
 """Wrapper for [`MultivariateStats.PPCA`](https://juliastats.org/MultivariateStats.jl/stable/pca/#Probabilistic-Principal-Component-Analysis)."""
-PPCACompressor(maxoutdim::Integer; kwargs...) = MVSCompressor(maxoutdim, PPCA, kwargs)
+function PPCACompressor(maxoutdim::Integer; kwargs...)
+    compressor = MVSCompressor(maxoutdim, PPCA, kwargs)
+    return compressor
+end
+
 
 # Factor Analysis Compressor
 """Wrapper for [`MultivariateStats.FactorAnalysis`](https://juliastats.org/MultivariateStats.jl/stable/fa/)"""
-FactorAnalysisCompressor(maxoutdim::Integer; kwargs...) = MVSCompressor(maxoutdim, FactorAnalysis, kwargs)
+function FactorAnalysisCompressor(maxoutdim::Integer; kwargs...)
+    compressor = MVSCompressor(maxoutdim, FactorAnalysis, kwargs)
+    return compressor
+end
 
 # Multidimensional Scaling
 # MDSCompressor(maxoutdim::Integer) = MVSCompressor(maxoutdim, MDS)
