@@ -13,7 +13,6 @@ using NearestNeighbors
 using StaticArrays
 
 using LinearAlgebra
-using Logging
 using Random
 
 export
