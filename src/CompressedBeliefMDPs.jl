@@ -11,6 +11,8 @@ using Distributions
 using Bijections
 using NearestNeighbors
 using StaticArrays
+using Combinatorics
+using IterTools
 
 using LinearAlgebra
 using Random
@@ -58,8 +60,8 @@ export
 include("solver.jl")
 
 export
-    CircularCorridorPOMDP,
-    CircularCorridorState
+    CircularMaze,
+    CircularMazeState
 include("envs/circular.jl")
 
 end # module CompressedBeliefMDPs
