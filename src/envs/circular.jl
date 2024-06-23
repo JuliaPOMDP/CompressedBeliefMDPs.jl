@@ -184,7 +184,7 @@ function POMDPs.transition(pomdp::CircularMaze, s::CircularMazeState, a::Integer
     return d
 end
     
-function POMDPs.reward(pomdp::CircularMaze, s::Union{CircularMaze, TerminalState}, a::Integer)
+function POMDPs.reward(pomdp::CircularMaze, s::Union{CircularMazeState, TerminalState}, a::Integer)
     @assert a in actions(pomdp) "Unrecognized action $a"
     if s ∈ pomdp.goals && a == CMAZE_DECLARE_GOAL
         r = pomdp.r_findgoal
