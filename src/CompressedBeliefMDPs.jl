@@ -61,7 +61,11 @@ include("solver.jl")
 
 export
     CircularMaze,
-    CircularMazeState
+    CircularMazeState,
+    CMAZE_LEFT,
+    CMAZE_RIGHT,
+    CMAZE_SENSE_CORRIDOR,
+    CMAZE_DECLARE_GOAL
 include("envs/circular.jl")
 
 end # module CompressedBeliefMDPs

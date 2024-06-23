@@ -12,6 +12,7 @@ struct CircularMaze <: POMDP{Union{CircularMazeState, TerminalState}, Integer, I
 
     r_findgoal::Float64
     goals::AbstractArray
+    # TODO: add RNG support
 end
 
 function _get_mass(d, x1, x2)
@@ -50,12 +51,19 @@ end
 function CircularMaze(
     n_corridors::Integer, 
     corridor_length::Integer, 
-    discount::Float64,
+    discount::Float64;
+    r_findgoal::Float64 = 1.0,
+    rng::AbstractRNG = MersenneTwister()
 )
     probabilities = _make_probabilities(corridor_length)
     center = div(corridor_length, 2) + 1
-    goals = []  # TODO: fix this
-    pomdp = CircularMaze(n_corridors, corridor_length, probabilities, center, discount, goals)
+    goals = []
+    positions = rand(rng, 1:corridor_length, n_corridors)
+    for (corridor, x) in enumerate(positions)
+        s = CircularMazeState(corridor, x)
+        push!(goals, s)
+    end
+    pomdp = CircularMaze(n_corridors, corridor_length, probabilities, center, discount, r_findgoal, goals)
     return pomdp
 end
 
@@ -64,16 +72,16 @@ function CircularMaze()
     return pomdp
 end
 
-const LEFT = 0
-const RIGHT = 1
-const SENSE_CORRIDOR = 2
-const DECLARE_GOAL = 3
+const CMAZE_LEFT = 0
+const CMAZE_RIGHT = 1
+const CMAZE_SENSE_CORRIDOR = 2
+const CMAZE_DECLARE_GOAL = 3
 
 const ACTIONS = [
-    LEFT,
-    RIGHT,
-    SENSE_CORRIDOR,
-    DECLARE_GOAL
+    CMAZE_LEFT,
+    CMAZE_RIGHT,
+    CMAZE_SENSE_CORRIDOR,
+    CMAZE_DECLARE_GOAL
 ]
 
 function POMDPs.actions(::CircularMaze)
@@ -123,37 +131,11 @@ function _center_probabilities(pomdp::CircularMaze, x::Integer)
     return centered_probabilities
 end
 
-# return a discretized von Mises distribution with a center at x
-# function _make_sparse_cat_over_single_corridor(pomdp::CircularMaze, x::Integer)
-#     values = states(pomdp)
-#     shifts = pomdp.center - x
-#     probabilities = circshift(pomdp.probabilities, shifts)
-#     d = SparseCat(values, probabilities)  # NOTE: we use SparseCat b/c it makes it easy to define a distribution sample as a CircularMazeState
-#     return d
-# end
-
-# # return a distribution over all possible states
-# function _make_sparse_cat_over_all_corridors(pomdp::CircularMaze, x::Integer)
-#     values = states(pomdp)
-#     shifts = pomdp.center - x
-#     probabilities = circshift(pomdp.probabilities, shifts)
-#     probabilities = repeat(probabilities, pomdp.n_corridors)
-#     probabilities /= pomdp.n_corridors  # normalize values to sum to 1
-#     d = SparseCat(values, probabilities)
-#     return d
-# end
-
 # observations identify the current state modulo 100 with a mean equal to the true state s.x (modulo 100)
 function POMDPs.observation(pomdp::CircularMaze, s::CircularMazeState, a::Integer, sp::CircularMazeState)
-    if a == SENSE_CORRIDOR
+    if a == CMAZE_SENSE_CORRIDOR
         obs = Deterministic(s.corridor)
     else
-        # corridor = s.corridor
-        # corridor_states = []
-        # for x ∈ 1:pomdp.corridor_length
-        #     s_ = CircularMazeState(corridor, x)
-        #     push!(states, s_)
-        # end
         values = 1:pomdp.corridor_length
         probabilities = _center_probabilities(pomdp, s.x)
         d = SparseCat(values, probabilities)
@@ -164,7 +146,7 @@ end
 
 function POMDPs.observations(pomdp::CircularMaze)
     # NOTE: In JuliaPOMDPs, an observation space is NOT the set of possible distributions, but rather union of the support of all possible observations
-    corridors = 1:pomdp.n_corridors  # from SENSE_CORRIDOR
+    corridors = 1:pomdp.n_corridors  # from CMAZE_SENSE_CORRIDOR
     perms = permutations(pomdp.probabilities)
     space = chain(corridors, perms)  # generator
     return space
@@ -175,17 +157,17 @@ end
 
 function POMDPs.transition(pomdp::CircularMaze, s::CircularMazeState, a::Integer)
     @assert a in actions(pomdp) "Unrecognized action $a"
-    if a == DECLARE_GOAL
+    if a == CMAZE_DECLARE_GOAL
         # env resets when goal is declared regardless of whether agent is actually at the goal
         d = Deterministic(terminalstate)
     else
-        # move left/right with some von Mises noise
-        if a == LEFT
+        # move CMAZE_LEFT/CMAZE_RIGHT with some von Mises noise
+        if a == CMAZE_LEFT
             x = s.x - 1
             if x < 1
                 x = pomdp.corridor_length
             end
-        elseif a == RIGHT
+        elseif a == CMAZE_RIGHT
             x = (s.x + 1) % pomdp.corridor_length
         else
             x = s.x
@@ -194,7 +176,7 @@ function POMDPs.transition(pomdp::CircularMaze, s::CircularMazeState, a::Integer
         corridor_states = []
         for x_ ∈ 1:pomdp.corridor_length
             s_ = CircularMazeState(corridor, x_)
-            push!(states, s_)
+            push!(corridor_states, s_)
         end
         probabilities = _center_probabilities(pomdp, x)
         d = SparseCat(corridor_states, probabilities)
@@ -204,7 +186,7 @@ end
     
 function POMDPs.reward(pomdp::CircularMaze, s::Union{CircularMaze, TerminalState}, a::Integer)
     @assert a in actions(pomdp) "Unrecognized action $a"
-    if s ∈ pomdp.goals && a == DECLARE_GOAL
+    if s ∈ pomdp.goals && a == CMAZE_DECLARE_GOAL
         r = pomdp.r_findgoal
     else
         r = 0
