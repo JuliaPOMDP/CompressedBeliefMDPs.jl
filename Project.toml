@@ -27,6 +27,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 [compat]
 Bijections = "0.1"
 Distances = "0.10"
+Distributions = "0.25"
 Flux = "0.14"
 LocalApproximationValueIteration = "0.4.3"
 LocalFunctionApproximation = "1.1.1"
