@@ -31,7 +31,7 @@ function _make_probabilities(corridor_length)
     max_ = maximum(d)
     step_size = (max_ - min_) / corridor_length
     probabilities = []
-    for x1 in min_:step_size:max_
+    for x1 in min_:step_size:(max_ - 1)
         x2 = x1 + step_size
         m = _get_mass(d, x1, x2)
         push!(probabilities, m)
@@ -124,7 +124,7 @@ function _center_probabilities(pomdp::CircularMaze, x::Integer)
 end
 
 # observations identify the current state modulo 100 with a mean equal to the true state s.x (modulo 100)
-function POMDPs.observation(pomdp::CircularMaze, s::CircularMazeState, a::Integer, sp::CircularMazeState)
+function POMDPs.observation(pomdp::CircularMaze, s::CircularMazeState, a::Integer, ::CircularMazeState)
     if a == CMAZE_SENSE_CORRIDOR
         obs = Deterministic(s.corridor)
     else
@@ -137,6 +137,10 @@ function POMDPs.observation(pomdp::CircularMaze, s::CircularMazeState, a::Intege
         obs = d
     end
     return obs
+end
+
+function POMDPs.observation(pomdp::CircularMaze, s::TerminalState)
+    return Deterministic(terminalstate)
 end
 
 function POMDPs.observations(pomdp::CircularMaze)
