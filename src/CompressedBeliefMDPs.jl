@@ -1,5 +1,7 @@
 module CompressedBeliefMDPs
 
+using Infiltrator  # TODO: remove
+
 # Packages from JuliaPOMDPs
 using POMDPs, POMDPTools, POMDPModels
 using ParticleFilters

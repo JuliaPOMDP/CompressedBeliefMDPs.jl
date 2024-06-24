@@ -15,6 +15,7 @@ struct CircularMaze <: POMDP{Union{CircularMazeState, TerminalState}, Integer, I
     # TODO: add RNG support
 end
 
+# get the mass of each state
 function _get_mass(d, x1, x2)
     @assert x2 >= x1
     c1 = cdf(d, x1)
@@ -23,27 +24,17 @@ function _get_mass(d, x1, x2)
     return m
 end
 
-# get the probability masses for each state in a discretized von Mises distribution
+# returns an array of probability masses for a single corridor
 function _make_probabilities(corridor_length)
-    d = VonMises()  # von Mises distribution with zero mean and unit concentration
-    min_ = minimum(d)  # default to -π
-    max_ = maximum(d)  # defaults to π
-    step = (max_ - min_) / corridor_length
+    d = VonMises()
+    min_ = minimum(d)
+    max_ = maximum(d)
+    step_size = (max_ - min_) / corridor_length
     probabilities = []
-    if corridor_length % 2 == 0  # offset indices by step / 2 when corridor_length is even
-        for x1 in (min_ + step / 2):step:(max_ - 1.5 * step)
-            m = _get_mass(d, x1,  x1 + step)
-            push!(probabilities, m)
-        end
-        m1 = _get_mass(d, max_ - step / 2, max_)
-        m2 = _get_mass(d, min_, min_ + step / 2)
-        m = m1 + m2
+    for x1 in min_:step_size:max_
+        x2 = x1 + step_size
+        m = _get_mass(d, x1, x2)
         push!(probabilities, m)
-    else
-        for x1 in min_:step:(max_ - step)
-            m = _get_mass(d, x1, x1 + step)
-            push!(probabilities, m)
-        end
     end
     return probabilities
 end
@@ -121,6 +112,7 @@ function POMDPs.initialstate(pomdp::CircularMaze)
     probabilities = repeat(pomdp.probabilities, pomdp.n_corridors)
     probabilities /= pomdp.n_corridors  # normalize values to sum to 1
     values = states(pomdp)
+    push!(probabilities, 0)  # address OBOE from terminalstate
     d = SparseCat(values, probabilities)
     return d
 end
@@ -153,7 +145,6 @@ function POMDPs.observations(pomdp::CircularMaze)
 end
 
 # TODO: maybe implement POMDPs.obsindex
-
 
 function POMDPs.transition(pomdp::CircularMaze, s::CircularMazeState, a::Integer)
     @assert a in actions(pomdp) "Unrecognized action $a"
