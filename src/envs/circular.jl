@@ -140,12 +140,13 @@ function POMDPs.observations(pomdp::CircularMaze)
     # NOTE: In JuliaPOMDPs, an observation space is NOT the set of possible distributions, but rather union of the support of all possible observations
     corridors = 1:pomdp.n_corridors  # from CMAZE_SENSE_CORRIDOR
     perms = permutations(pomdp.probabilities)
-    space = chain(corridors, perms)  # generator
+    space = Iterators.flatten(corridors, perms)  # generator
     return space
 end
 
 # TODO: maybe implement POMDPs.obsindex
 
+# TODO: confirm that transitions are non-Deterministic
 function POMDPs.transition(pomdp::CircularMaze, s::CircularMazeState, a::Integer)
     @assert a in actions(pomdp) "Unrecognized action $a"
     if a == CMAZE_DECLARE_GOAL

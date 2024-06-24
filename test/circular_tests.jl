@@ -1,5 +1,5 @@
 let
-    pomdp = CircularMaze()
+    pomdp = CircularMaze(2, 5, 0.99)
 
     policy = RandomPolicy(pomdp, rng=MersenneTwister(2))
     sim = RolloutSimulator(rng=MersenneTwister(3), max_steps=100)
