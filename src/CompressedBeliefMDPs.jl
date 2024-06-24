@@ -14,7 +14,7 @@ using Bijections
 using NearestNeighbors
 using StaticArrays
 using Combinatorics
-using IterTools
+using IterTools  # TODO: not sure if I need this anymore
 
 using LinearAlgebra
 using Random
