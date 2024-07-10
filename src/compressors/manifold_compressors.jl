@@ -17,7 +17,12 @@ function (c::ManifoldCompressor)(beliefs)
     if ismissing(c.M)
         @warn "compressor.M is missing"
     end
-    return ndims(beliefs) == 2 ? ManifoldLearning.predict(c.M, beliefs')' : vec(ManifoldLearning.predict(c.M, beliefs))
+    if ndims(beliefs) == 2
+        result = ManifoldLearning.predict(c.M, beliefs')'
+    else
+        result = vec(ManifoldLearning.predict(c.M, beliefs))
+    end
+    return result
 end
 
 function fit!(c::ManifoldCompressor{T}, beliefs) where T

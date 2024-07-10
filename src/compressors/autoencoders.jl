@@ -28,5 +28,10 @@ function fit!(c::AutoencoderCompressor, beliefs)
 end
 
 function (c::AutoencoderCompressor)(beliefs)
-    return ndims(beliefs) == 2 ? c.encoder(beliefs')' : c.encoder(beliefs)
+    if ndims(beliefs) == 2
+        result = c.encoder(beliefs')'
+    else
+        result = c.encoder(beliefs)
+    end
+    return result
 end

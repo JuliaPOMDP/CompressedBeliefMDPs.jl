@@ -30,15 +30,22 @@ end
 
 function POMDPs.action(p::CompressedBeliefPolicy, s)
     b = initialize_belief(p.m.bmdp.updater, s)
-    action(p.base_policy, encode(p.m, b))
+    b̃ = encode(p.m, b)
+    a = action(p.base_policy, b̃)
+    return a
 end
 
 function POMDPs.value(p::CompressedBeliefPolicy, s)
     b = initialize_belief(p.m.bmdp.updater, s)
-    value(p.base_policy, encode(p.m, b))
+    b̃ = encode(p.m, b)
+    v = value(p.base_policy, b̃)
+    return v
 end
 
-POMDPs.updater(p::CompressedBeliefPolicy) = p.m.bmdp.updater
+function POMDPs.updater(p::CompressedBeliefPolicy)
+    up = p.m.bmdp.updater
+    return up
+end
 
 ### SOLVER ###
 
@@ -82,7 +89,12 @@ struct CompressedBeliefSolver <: Solver
     base_solver::Solver
 end
 
-function _make_compressed_belief_MDP(pomdp::POMDP, sampler::Sampler, updater::Updater, compressor::Compressor)
+function _make_compressed_belief_MDP(
+    pomdp::POMDP, 
+    sampler::Sampler, 
+    updater::Updater, 
+    compressor::Compressor
+)
     # sample beliefs
     B = sampler(pomdp)
 
@@ -124,6 +136,12 @@ function CompressedBeliefSolver(
     n_generative_samples=10,  # number of steps to look ahead when calculated expected reward
     belres::Float64=1e-3
 )
+    # Type assertions
+    @assert k > 0 "k must be greater than 0"
+    @assert max_iterations > 0 "max_iterations must be greater than 0"
+    @assert n_generative_samples > 0 "n_generative_samples must be greater than 0"
+    @assert belres > 0.0 "Belman residual (belres) must be greater than 0.0"
+
     m, B̃ = _make_compressed_belief_MDP(pomdp, sampler, updater, compressor)
 
     # define the interpolator for the solver
@@ -146,7 +164,10 @@ function CompressedBeliefSolver(
     return CompressedBeliefSolver(m, base_solver)
 end
 
-function POMDPs.solve(solver::CompressedBeliefSolver, pomdp::POMDP)
+function POMDPs.solve(
+    solver::CompressedBeliefSolver, 
+    pomdp::POMDP
+)
     if solver.m.bmdp.pomdp !== pomdp
         @warn "Got $pomdp, but solver.m.bmdp.pomdp $(solver.m.bmdp.pomdp) isn't identical"
     end

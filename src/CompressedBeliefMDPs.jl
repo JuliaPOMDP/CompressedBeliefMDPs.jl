@@ -17,7 +17,19 @@ using Combinatorics
 using IterTools  # TODO: not sure if I need this anymore
 
 using LinearAlgebra
+using Parameters
 using Random
+
+
+export
+    CircularMaze,
+    CircularMazeState,
+    CMAZE_LEFT,
+    CMAZE_RIGHT,
+    CMAZE_SENSE_CORRIDOR,
+    CMAZE_DECLARE_GOAL
+include("envs/circular.jl")
+
 
 export
     ### Compressor Interface ###
@@ -60,14 +72,5 @@ export
     CompressedBeliefPolicy,
     solve
 include("solver.jl")
-
-export
-    CircularMaze,
-    CircularMazeState,
-    CMAZE_LEFT,
-    CMAZE_RIGHT,
-    CMAZE_SENSE_CORRIDOR,
-    CMAZE_DECLARE_GOAL
-include("envs/circular.jl")
 
 end # module CompressedBeliefMDPs

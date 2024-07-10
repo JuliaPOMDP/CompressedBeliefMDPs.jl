@@ -58,6 +58,11 @@ end
 Implements a [VAE](https://arxiv.org/abs/1312.6114) in Flux.
 """
 function VAECompressor(input_dim::Integer, latent_dim::Integer; hidden_dim::Integer=2, optimizer=Adam(), epochs::Integer=10, verbose=false)
+    @assert input_dim > 0 "Input dimension must be a positive integer."
+    @assert latent_dim > 0 "Latent dimension must be a positive integer."
+    @assert hidden_dim > 0 "Hidden dimension must be a positive integer."
+    @assert epochs > 0 "Number of epochs must be a positive integer."
+    
     encoder = Encoder(input_dim, latent_dim, hidden_dim)
     decoder = Decoder(input_dim, latent_dim, hidden_dim)
     VAECompressor(encoder, decoder, optimizer, epochs, verbose)

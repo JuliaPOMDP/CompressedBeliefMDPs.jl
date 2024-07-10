@@ -3,7 +3,11 @@ struct CircularMazeState
     x::Integer  # position in corridor ∈ [1, ..., corridor_length]
 end
 
-struct CircularMaze <: POMDP{Union{CircularMazeState, TerminalState}, Integer, Integer}
+struct CircularMaze <: POMDP{
+    Union{CircularMazeState, TerminalState}, 
+    Integer, 
+    Integer
+}
     n_corridors::Integer  # number of corridors
     corridor_length::Integer  # corridor length
     probabilities::AbstractArray  # probability masses for creating von Mises distributions
@@ -18,6 +22,9 @@ end
 # get the mass of each state
 function _get_mass(d, x1, x2)
     @assert x2 >= x1
+    @assert minimum(d) <= x1 && x1 <= maximum(d)
+    @assert minimum(d) <= x2 && x2 <= maximum(d)
+
     c1 = cdf(d, x1)
     c2 = cdf(d, x2)
     m = c2 - c1
@@ -25,7 +32,9 @@ function _get_mass(d, x1, x2)
 end
 
 # returns an array of probability masses for a single corridor
-function _make_probabilities(corridor_length)
+function _make_probabilities(corridor_length::Integer)
+    @assert corridor_length >= 0
+
     d = VonMises()
     min_ = minimum(d)
     max_ = maximum(d)
@@ -46,6 +55,11 @@ function CircularMaze(
     r_findgoal::Float64 = 1.0,
     rng::AbstractRNG = MersenneTwister()
 )
+    @assert n_corridors > 0 "Number of corridors must be a positive integer."
+    @assert corridor_length > 0 "Corridor length must be a positive integer."
+    @assert 0.0 <= discount <= 1.0 "Discount factor must be between 0 and 1."
+    @assert r_findgoal >= 0.0 "Reward for finding the goal must be non-negative."
+
     probabilities = _make_probabilities(corridor_length)
     center = div(corridor_length, 2) + 1
     goals = []
@@ -63,10 +77,10 @@ function CircularMaze()
     return pomdp
 end
 
-const CMAZE_LEFT = 0
-const CMAZE_RIGHT = 1
-const CMAZE_SENSE_CORRIDOR = 2
-const CMAZE_DECLARE_GOAL = 3
+const CMAZE_LEFT = 1
+const CMAZE_RIGHT = 2
+const CMAZE_SENSE_CORRIDOR = 3
+const CMAZE_DECLARE_GOAL = 4
 
 const ACTIONS = [
     CMAZE_LEFT,
@@ -112,7 +126,7 @@ function POMDPs.initialstate(pomdp::CircularMaze)
     probabilities = repeat(pomdp.probabilities, pomdp.n_corridors)
     probabilities /= pomdp.n_corridors  # normalize values to sum to 1
     values = states(pomdp)
-    push!(probabilities, 0)  # address OBOE from terminalstate
+    push!(probabilities, 0)  # OBOE from terminal state
     d = SparseCat(values, probabilities)
     return d
 end
@@ -124,7 +138,13 @@ function _center_probabilities(pomdp::CircularMaze, x::Integer)
 end
 
 # observations identify the current state modulo 100 with a mean equal to the true state s.x (modulo 100)
-function POMDPs.observation(pomdp::CircularMaze, s::CircularMazeState, a::Integer, ::CircularMazeState)
+function POMDPs.observation(
+    pomdp::CircularMaze, 
+    s::CircularMazeState, 
+    a::Integer, 
+    ::CircularMazeState
+)
+    @assert a in actions(pomdp) "Unrecognized action $a"
     if a == CMAZE_SENSE_CORRIDOR
         obs = Deterministic(s.corridor)
     else
@@ -151,7 +171,11 @@ end
 
 # TODO: maybe implement POMDPs.obsindex
 
-function POMDPs.transition(pomdp::CircularMaze, s::CircularMazeState, a::Integer)
+function POMDPs.transition(
+    pomdp::CircularMaze, 
+    s::CircularMazeState, 
+    a::Integer
+)
     @assert a in actions(pomdp) "Unrecognized action $a"
     if a == CMAZE_DECLARE_GOAL
         # env resets when goal is declared regardless of whether agent is actually at the goal
@@ -182,8 +206,23 @@ function POMDPs.transition(pomdp::CircularMaze, s::CircularMazeState, a::Integer
     end
     return d
 end
-    
-function POMDPs.reward(pomdp::CircularMaze, s::Union{CircularMazeState, TerminalState}, a::Integer)
+
+function POMDPs.transition(
+    pomdp::CircularMaze, 
+    ::TerminalState, 
+    a::Integer
+)
+    @assert a in actions(pomdp) "Unrecognized action $a"
+    terminal = Deterministic(terminalstate)
+    return terminal
+end
+   
+# NOTE: https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/model/#Terminal-State -- no type unions
+function POMDPs.reward(
+    pomdp::CircularMaze, 
+    s::CircularMazeState,
+    a::Integer
+)
     @assert a in actions(pomdp) "Unrecognized action $a"
     if s ∈ pomdp.goals && a == CMAZE_DECLARE_GOAL
         r = pomdp.r_findgoal
@@ -191,4 +230,25 @@ function POMDPs.reward(pomdp::CircularMaze, s::Union{CircularMazeState, Terminal
         r = 0
     end
     return r
+end
+
+function POMDPs.reward(
+    ::CircularMaze, 
+    ::TerminalState,
+    ::Integer
+)
+    r = 0
+    return r
+end
+
+function POMDPs.discount(pomdp::CircularMaze)
+    disc = pomdp.discount
+    return disc
+end
+
+## hack to avoid exploring terminal states
+global CMAZE_TERMINAL_FLAG = false
+function POMDPTools.ModelTools.gbmdp_handle_terminal(::CircularMaze, ::Updater, b, s, a, rng)
+    global CMAZE_TERMINAL_FLAG = true
+    return b
 end

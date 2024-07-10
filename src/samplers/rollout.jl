@@ -45,6 +45,7 @@ function PolicySampler(
     PolicySampler(policy, updater, n, rng)
 end
 
+
 function (s::PolicySampler)(pomdp::POMDP)
     B = []
     mdp = GenerativeBeliefMDP(pomdp, s.updater)
@@ -54,16 +55,41 @@ function (s::PolicySampler)(pomdp::POMDP)
             if length(B) == s.n
                 return unique!(B)
             end
+            a = action(s.policy, b)
             if isterminal(mdp.pomdp, rand(s.rng, b))
                 break
             end
-            a = action(s.policy, b)
             b = @gen(:sp)(mdp, b, a, s.rng)
             push!(B, b)
         end
     end
     return B
 end
+
+
+function (s::PolicySampler)(pomdp::CircularMaze)
+    B = []
+    mdp = GenerativeBeliefMDP(pomdp, s.updater)
+    while true
+        b = initialstate(mdp).val
+        for _ in 1:s.n
+            if length(B) == s.n
+                return unique!(B)
+            end
+            a = action(s.policy, b)
+            b = @gen(:sp)(mdp, b, a, s.rng)
+            if CMAZE_TERMINAL_FLAG
+                global CMAZE_TERMINAL_FLAG = false
+                break
+            else
+                push!(B, b)
+            end
+        end
+    end
+    return B
+end
+
+
 
 """
     ExplorationPolicySampler
@@ -114,8 +140,11 @@ function ExplorationPolicySampler(pomdp::POMDP;
     updater::Updater=DiscreteUpdater(pomdp), 
     n=10, 
 )
-    ExplorationPolicySampler(explorer, on_policy, updater, n, rng)
+    @assert n > 0 "n must be a positive integer"
+    sampler = ExplorationPolicySampler(explorer, on_policy, updater, n, rng)
+    return sampler
 end
+
 
 function (s::ExplorationPolicySampler)(pomdp::POMDP)
     B = []
@@ -126,14 +155,39 @@ function (s::ExplorationPolicySampler)(pomdp::POMDP)
             if length(B) == s.n
                 return unique!(B)
             end
+            a = action(s.explorer, s.on_policy, k, b)
             if isterminal(mdp.pomdp, rand(s.rng, b))
                 break
             end
-            a = action(s.explorer, s.on_policy, k, b)
             b = @gen(:sp)(mdp, b, a, s.rng)
             push!(B, b)
         end
     end
     return B
 end
+
+
+function (s::ExplorationPolicySampler)(pomdp::CircularMaze)
+    B = []
+    mdp = GenerativeBeliefMDP(pomdp, s.updater)
+    while true
+        b = initialstate(mdp).val
+        for k in 1:s.n
+            if length(B) == s.n
+                return unique!(B)
+            end
+            a = action(s.explorer, s.on_policy, k, b)
+            b = @gen(:sp)(mdp, b, a, s.rng)
+            if CMAZE_TERMINAL_FLAG
+                global CMAZE_TERMINAL_FLAG = false
+                break
+            else
+                push!(B, b)
+            end
+        end
+    end
+    return B
+end
+
+
 

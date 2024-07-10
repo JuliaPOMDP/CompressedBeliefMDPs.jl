@@ -39,7 +39,11 @@ struct CompressedBeliefMDP{B, A} <: MDP{B, A}
 end
 
 
-function CompressedBeliefMDP(pomdp::POMDP, updater::Updater, compressor::Compressor)
+function CompressedBeliefMDP(
+    pomdp::POMDP, 
+    updater::Updater, 
+    compressor::Compressor
+)
     # Hack to determine typeof(b̃)
     bmdp = GenerativeBeliefMDP(pomdp, updater)
     b = initialstate(bmdp).val
@@ -71,7 +75,12 @@ function encode(m::CompressedBeliefMDP, b)
 end
 
 
-function POMDPs.gen(m::CompressedBeliefMDP, b̃, a, rng::Random.AbstractRNG)
+function POMDPs.gen(
+    m::CompressedBeliefMDP, 
+    b̃, 
+    a, 
+    rng::Random.AbstractRNG
+)
     b = decode(m, b̃)
     bp, r = @gen(:sp, :r)(m.bmdp, b, a, rng)
     b̃p = encode(m, bp)
@@ -105,12 +114,14 @@ end
 
 
 function POMDPs.actions(m::CompressedBeliefMDP)
-    return actions(m.bmdp)
+    A = actions(m.bmdp)
+    return A
 end
 
 
 function POMDPs.actionindex(m::CompressedBeliefMDP, a)
-    return actionindex(m.bmdp.pomdp, a)
+    index = actionindex(m.bmdp.pomdp, a)
+    return index
 end
 
 
@@ -121,8 +132,10 @@ end
 
 
 function POMDPs.discount(m::CompressedBeliefMDP)
-    return discount(m.bmdp)
+    γ = discount(m.bmdp)
+    return γ
 end
+
 
 ### Convenience Methods ###
 function POMDPs.convert_s(t::Type, s, m::CompressedBeliefMDP)

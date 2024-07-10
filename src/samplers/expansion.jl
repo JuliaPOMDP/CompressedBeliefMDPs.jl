@@ -51,13 +51,20 @@ function BeliefExpansionSampler(
     return BeliefExpansionSampler(updater, metric, n)
 end
 
-function _make_numeric(b, pomdp::POMDP)
+function _make_numeric(
+    b, 
+    pomdp::POMDP
+)
     b = convert_s(AbstractArray{Float64}, b, pomdp)
     return SVector{length(b)}(b)
 end
 
 
-function _successors(pomdp::POMDP, b, updater::Updater)
+function _successors(
+    pomdp::POMDP, 
+    b, 
+    updater::Updater
+)
     # Adapted from PointBasedValueIteration.jl: https://github.com/JuliaPOMDP/PointBasedValueIteration.jl/blob/master/src/pbvi.jl
     succs = []
     for a in actions(pomdp, b), o in observations(pomdp)            

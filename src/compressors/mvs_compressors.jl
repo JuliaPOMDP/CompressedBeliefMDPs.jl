@@ -18,7 +18,12 @@ function (c::MVSCompressor)(beliefs)
     if ismissing(c.M)
         @warn "compressor.M is missing"
     end
-    return ndims(beliefs) == 2 ? predict(c.M, beliefs')' : vec(predict(c.M, beliefs))
+    if ndims(beliefs) == 2
+        result = predict(c.M, beliefs')'
+    else
+        result = vec(predict(c.M, beliefs))
+    end
+    return result
 end
 
 function fit!(c::MVSCompressor{T}, beliefs) where T
