@@ -100,7 +100,8 @@ function _exploratory_belief_expansion!(
 end
 
 function (s::BeliefExpansionSampler)(pomdp::POMDP)
-    b0 = initialize_belief(s.updater, initialstate(pomdp))
+    s0 = initialstate(pomdp)
+    b0 = initialize_belief(s.updater, s0)
     b0_numeric = _make_numeric(b0, pomdp)
     B = Set([b0])
     B_numeric = [b0_numeric]

@@ -1,9 +1,12 @@
 module CompressedBeliefMDPs
 
-using Infiltrator  # TODO: remove
+using Infiltrator
+# TODO: remove plots, revise, Infiltrator
 
 # Packages from JuliaPOMDPs
-using POMDPs, POMDPTools, POMDPModels
+using POMDPs
+using POMDPTools
+using POMDPModels
 using ParticleFilters
 using LocalApproximationValueIteration
 using LocalFunctionApproximation
@@ -14,7 +17,8 @@ using Bijections
 using NearestNeighbors
 using StaticArrays
 using Combinatorics
-using IterTools  # TODO: not sure if I need this anymore
+using IterTools
+using Plots
 
 using LinearAlgebra
 using Parameters
@@ -29,7 +33,6 @@ export
     CMAZE_SENSE_CORRIDOR,
     CMAZE_DECLARE_GOAL
 include("envs/circular.jl")
-
 
 export
     ### Compressor Interface ###

@@ -1,15 +1,21 @@
-let
+@testset "CircularMaze" begin
     pomdp = CircularMaze(2, 5, 0.99)
     @test has_consistent_distributions(pomdp)
 
     # test non-exported solvers
-    # solvers = [
-    #     MCTSSolver(n_iterations=10, depth=5, exploration_constant=5.0),
-    # ]
-    # @testset "$solver" for solver in solvers
-    #     @test test_solver(solver, pomdp)
-    #     # @test_nowarn test_solver(solver, pomdp)
-    # end
+    @testset "Solvers" begin
+        @testset "MCTS" begin
+            solver = MCTSSolver(n_iterations=10, depth=5, exploration_constant=5.0)
+            @test_nowarn test_solver(solver, pomdp)
+        end
+
+        # @testset "CompressedSolver" begin
+        #     # TODO: compressed solver
+        #     solver = MCTSSolver(n_iterations=10, depth=5, exploration_constant=5.0)
+        #     # @test_nowarn test_solver(solver, pomdp)
+        # end
+    end
+
 
     # test CompressedBeliefSolver
     @testset "Samplers" begin
@@ -17,10 +23,10 @@ let
             @test_nowarn test_solver(CompressedBeliefSolver(pomdp; sampler=PolicySampler(pomdp)), pomdp)
         end
         @testset "ExplorationPolicySampler" begin
-            @test_nowarn test_solver(CompressedBeliefSolver(pomdp; sampler=PolicySampler(pomdp)), pomdp)
+            @test_nowarn test_solver(CompressedBeliefSolver(pomdp; sampler=ExplorationPolicySampler(pomdp)), pomdp)
         end
         @testset "BeliefExpansionSampler" begin
-            @test_nowarn test_solver(CompressedBeliefSolver(pomdp; sampler=PolicySampler(pomdp)), pomdp)
+            @test_nowarn test_solver(CompressedBeliefSolver(pomdp; sampler=BeliefExpansionSampler(pomdp)), pomdp)
         end
     end
    

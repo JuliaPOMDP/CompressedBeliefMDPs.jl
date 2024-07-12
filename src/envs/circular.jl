@@ -15,15 +15,21 @@ struct CircularMaze <: POMDP{
     discount::Float64
 
     r_findgoal::Float64
+    r_timestep_penalty::Float64
     goals::AbstractArray
-    # TODO: add RNG support
 end
 
 # get the mass of each state
 function _get_mass(d, x1, x2)
-    @assert x2 >= x1
-    @assert minimum(d) <= x1 && x1 <= maximum(d)
-    @assert minimum(d) <= x2 && x2 <= maximum(d)
+    @assert x2 >= x1 "x2 ($x2) should be greater than or equal to x1 ($x1)"
+    @assert minimum(d) <= x1 <= maximum(d) """
+            x1 ($x1) should be within the distribution's range
+            (minimum: $(minimum(d)), maximum: $(maximum(d)))
+            """
+    @assert minimum(d) <= x2 <= maximum(d) """
+            x2 ($x2) should be within the distribution's range
+            (minimum: $(minimum(d)), maximum: $(maximum(d)))
+            """
 
     c1 = cdf(d, x1)
     c2 = cdf(d, x2)
@@ -37,28 +43,38 @@ function _make_probabilities(corridor_length::Integer)
 
     d = VonMises()
     min_ = minimum(d)
-    max_ = maximum(d)
-    step_size = (max_ - min_) / corridor_length
+    max_ = maximum(d)    
+    a = range(min_, max_, length=corridor_length + 1)
+    a1 = a[1:end-1]
+    a2 = a[2:end]
     probabilities = []
-    for x1 in min_:step_size:(max_ - 1)
-        x2 = x1 + step_size
+    for (x1, x2) in zip(a1, a2)
         m = _get_mass(d, x1, x2)
         push!(probabilities, m)
     end
+
     return probabilities
 end
 
 function CircularMaze(
     n_corridors::Integer, 
-    corridor_length::Integer, 
-    discount::Float64;
+    corridor_length::Integer; 
+    discount::Float64 = 0.99,
     r_findgoal::Float64 = 1.0,
+    r_timestep_penalty::Float64 = 0.0,
     rng::AbstractRNG = MersenneTwister()
 )
     @assert n_corridors > 0 "Number of corridors must be a positive integer."
     @assert corridor_length > 0 "Corridor length must be a positive integer."
     @assert 0.0 <= discount <= 1.0 "Discount factor must be between 0 and 1."
     @assert r_findgoal >= 0.0 "Reward for finding the goal must be non-negative."
+    @assert r_timestep_penalty >= 0.0 "The timestep penalty must be non-negative."
+
+    if typeof(n_corridors) != typeof(corridor_length)
+        type1 = typeof(n_corridors)
+        type2 = typeof(corridor_length)
+        @warn "n_corridors ($type1) and corridor_length ($type2) are not of the same type."
+    end
 
     probabilities = _make_probabilities(corridor_length)
     center = div(corridor_length, 2) + 1
@@ -68,12 +84,45 @@ function CircularMaze(
         s = CircularMazeState(corridor, x)
         push!(goals, s)
     end
-    pomdp = CircularMaze(n_corridors, corridor_length, probabilities, center, discount, r_findgoal, goals)
+    pomdp = CircularMaze(
+        n_corridors, 
+        corridor_length, 
+        probabilities,
+        center, 
+        discount, 
+        r_findgoal, 
+        r_timestep_penalty, 
+        goals
+    )
+    return pomdp
+end
+
+# conveience constructors
+function CircularMaze(
+    n_corridors::Integer, 
+    corridor_length::Integer, 
+    discount::Float64,
+    r_findgoal::Float64,
+    r_timestep_penalty::Float64,
+)
+    pomdp = CircularMaze(
+        n_corridors, 
+        corridor_length;
+        discount,
+        r_findgoal=r_findgoal, 
+        r_timestep_penalty=r_timestep_penalty, 
+    )
     return pomdp
 end
 
 function CircularMaze()
-    pomdp = CircularMaze(2, 200, 0.99)
+    pomdp = CircularMaze(
+        n_corridors=2, 
+        corridor_length=200, 
+        discount=0.99,
+        r_findgoal=1, 
+        r_timestep_penalty=0
+    )
     return pomdp
 end
 
@@ -229,6 +278,7 @@ function POMDPs.reward(
     else
         r = 0
     end
+    r -= pomdp.r_timestep_penalty
     return r
 end
 
@@ -247,7 +297,7 @@ function POMDPs.discount(pomdp::CircularMaze)
 end
 
 ## hack to avoid exploring terminal states
-global CMAZE_TERMINAL_FLAG = false
+CMAZE_TERMINAL_FLAG = false
 function POMDPTools.ModelTools.gbmdp_handle_terminal(::CircularMaze, ::Updater, b, s, a, rng)
     global CMAZE_TERMINAL_FLAG = true
     return b
