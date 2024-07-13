@@ -47,6 +47,7 @@ POMDPTools = "0.1.6, 1"
 POMDPs = "0.9.6, 1"
 Parameters = "0.12"
 ParticleFilters = "0.5.6"
+Plots = "1"
 StaticArrays = "1.9.3"
 julia = "1"
 
