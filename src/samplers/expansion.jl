@@ -48,6 +48,7 @@ function BeliefExpansionSampler(
     metric::NearestNeighbors.MinkowskiMetric=Euclidean(),
     n::Integer=3
 )
+    @assert n > 0 "n must be greater than 0"
     return BeliefExpansionSampler(updater, metric, n)
 end
 
@@ -59,7 +60,6 @@ function _make_numeric(
     return SVector{length(b)}(b)
 end
 
-
 function _successors(
     pomdp::POMDP, 
     b, 
@@ -67,12 +67,41 @@ function _successors(
 )
     # Adapted from PointBasedValueIteration.jl: https://github.com/JuliaPOMDP/PointBasedValueIteration.jl/blob/master/src/pbvi.jl
     succs = []
-    for a in actions(pomdp, b), o in observations(pomdp)            
-        s = update(updater, b, a, o)
-        push!(succs, s)
+    for a in actions(pomdp, b)
+        for o in observations(pomdp)
+            s = update(updater, b, a, o)
+            push!(succs, s)
+        end
     end
     return unique!(succs)
 end
+
+
+function _successors(
+    pomdp::POMDP, 
+    b, 
+    updater::DiscreteUpdater
+)
+    # Adapted from PointBasedValueIteration.jl: https://github.com/JuliaPOMDP/PointBasedValueIteration.jl/blob/master/src/pbvi.jl
+    succs = []
+    for a in actions(pomdp, b)
+        for o in observations(pomdp)
+            try
+                s = update(updater, b, a, o)
+                push!(succs, s)
+            catch e
+                # skip impossible observations
+                if isa(e, ErrorException) && occursin("Failed discrete belief update", e.msg)
+                    continue
+                else
+                    rethrow(e)  # Re-throw if it's a different error
+                end
+            end
+        end
+    end
+    return unique!(succs)
+end
+
 
 function _exploratory_belief_expansion!(
     pomdp::POMDP, 

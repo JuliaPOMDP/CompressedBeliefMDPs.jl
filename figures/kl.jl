@@ -10,4 +10,3 @@ B = sampler(pomdp)
 
 belief = B[1]
 
-
