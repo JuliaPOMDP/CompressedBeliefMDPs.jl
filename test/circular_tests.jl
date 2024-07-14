@@ -3,17 +3,12 @@
     @test has_consistent_distributions(pomdp)
 
     # test non-exported solvers
+    # NOTE: MCTS is broken currently
     # @testset "Solvers" begin
     #     @testset "MCTS" begin
     #         solver = MCTSSolver(n_iterations=10, depth=5, exploration_constant=5.0)
     #         @test_nowarn test_solver(solver, pomdp)
     #     end
-
-    #     # @testset "CompressedSolver" begin
-    #     #     # TODO: compressed solver
-    #     #     solver = MCTSSolver(n_iterations=10, depth=5, exploration_constant=5.0)
-    #     #     # @test_nowarn test_solver(solver, pomdp)
-    #     # end
     # end
 
 
