@@ -16,6 +16,8 @@ struct CircularMaze <: POMDP{
 
     r_findgoal::Float64
     r_timestep_penalty::Float64
+
+    states::AbstractArray
     goals::AbstractArray
 end
 
@@ -56,6 +58,18 @@ function _make_probabilities(corridor_length::Integer)
     return probabilities
 end
 
+function _make_states(n_corridors, corridor_length)
+    space = Union{CircularMazeState, TerminalState}[]
+    for i ∈ 1:n_corridors
+        for j ∈ 1:corridor_length
+            state = CircularMazeState(i, j)
+            push!(space, state)
+        end
+    end
+    push!(space, terminalstate)
+    return space
+end
+
 function CircularMaze(
     n_corridors::Integer, 
     corridor_length::Integer; 
@@ -78,12 +92,18 @@ function CircularMaze(
 
     probabilities = _make_probabilities(corridor_length)
     center = div(corridor_length, 2) + 1
+
+    # make states
+    states = _make_states(n_corridors, corridor_length)
+
+    # make goals
     goals = []
     positions = rand(rng, 1:corridor_length, n_corridors)
     for (corridor, x) in enumerate(positions)
         s = CircularMazeState(corridor, x)
         push!(goals, s)
     end
+
     pomdp = CircularMaze(
         n_corridors, 
         corridor_length, 
@@ -92,6 +112,7 @@ function CircularMaze(
         discount, 
         r_findgoal, 
         r_timestep_penalty, 
+        states,
         goals
     )
     return pomdp
@@ -116,13 +137,7 @@ function CircularMaze(
 end
 
 function CircularMaze()
-    pomdp = CircularMaze(
-        n_corridors=2, 
-        corridor_length=200, 
-        discount=0.99,
-        r_findgoal=1, 
-        r_timestep_penalty=0
-    )
+    pomdp = CircularMaze(2, 100)
     return pomdp
 end
 
@@ -149,14 +164,7 @@ function POMDPs.actionindex(::CircularMaze, a::Integer)
 end
 
 function POMDPs.states(pomdp::CircularMaze)
-    space = statetype(pomdp)[]
-    for i ∈ 1:pomdp.n_corridors
-        for j ∈ 1:pomdp.corridor_length
-            state = CircularMazeState(i, j)
-            push!(space, state)
-        end
-    end
-    push!(space, terminalstate)
+    space = pomdp.states
     return space
 end
 
@@ -172,8 +180,7 @@ end
 
 # the initial state distribution is a von Mises distributions each over corridor with a mean at the center
 function POMDPs.initialstate(pomdp::CircularMaze)
-    probabilities = repeat(pomdp.probabilities, pomdp.n_corridors)
-    probabilities /= pomdp.n_corridors  # normalize values to sum to 1
+    probabilities = repeat(pomdp.probabilities ./ pomdp.n_corridors, pomdp.n_corridors)
     values = states(pomdp)
     push!(probabilities, 0)  # OBOE from terminal state
     d = SparseCat(values, probabilities)
@@ -208,8 +215,8 @@ function POMDPs.observation(
     return obs
 end
 
-function POMDPs.observation(pomdp::CircularMaze, s::TerminalState)
-    return Deterministic(terminalstate)
+function POMDPs.observation(::CircularMaze, s::TerminalState)
+    return Deterministic(s)
 end
 
 function POMDPs.observations(pomdp::CircularMaze)
@@ -245,11 +252,10 @@ function POMDPs.transition(
             x = s.x
         end
         corridor = s.corridor
-        corridor_states = []
-        for x_ ∈ 1:pomdp.corridor_length
-            s_ = CircularMazeState(corridor, x_)
-            push!(corridor_states, s_)
-        end
+        states = pomdp.states
+        start = (corridor - 1) * pomdp.corridor_length + 1
+        stop = start + pomdp.corridor_length
+        corridor_states = states[start:stop]
         probabilities = _center_probabilities(pomdp, x)
         d = SparseCat(corridor_states, probabilities)
     end

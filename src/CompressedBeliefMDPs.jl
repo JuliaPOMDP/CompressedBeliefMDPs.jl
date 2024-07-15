@@ -19,6 +19,7 @@ using StaticArrays
 using Combinatorics
 using IterTools
 using Plots
+using ProgressMeter
 
 using LinearAlgebra
 using Parameters

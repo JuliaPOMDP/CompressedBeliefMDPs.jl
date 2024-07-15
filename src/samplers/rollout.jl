@@ -49,6 +49,8 @@ end
 function (s::PolicySampler)(pomdp::POMDP)
     B = []
     mdp = GenerativeBeliefMDP(pomdp, s.updater)
+    progress = Progress(s.n, 1)  # Initialize the progress bar
+
     while true
         b = initialstate(mdp).val
         for _ in 1:s.n
@@ -61,6 +63,7 @@ function (s::PolicySampler)(pomdp::POMDP)
             end
             b = @gen(:sp)(mdp, b, a, s.rng)
             push!(B, b)
+            next!(progress)  # Update the progress bar
         end
     end
     return B
@@ -69,7 +72,9 @@ end
 
 function (s::PolicySampler)(pomdp::CircularMaze)
     B = []
-    mdp = GenerativeBeliefMDP(pomdp, s.updater)
+    mdp = GenerativeBeliefMDP(pomdp, s.updater) 
+    progress = Progress(s.n, 1)  # Initialize the progress bar
+
     while true
         b = initialstate(mdp).val
         for _ in 1:s.n
@@ -83,11 +88,15 @@ function (s::PolicySampler)(pomdp::CircularMaze)
                 break
             else
                 push!(B, b)
+                next!(progress)  # Update the progress bar
             end
         end
     end
     return B
 end
+
+
+
 
 
 
@@ -146,9 +155,10 @@ function ExplorationPolicySampler(pomdp::POMDP;
 end
 
 
+
 function (s::ExplorationPolicySampler)(pomdp::POMDP)
     B = []
-    mdp = GenerativeBeliefMDP(pomdp, s.updater)
+    mdp = GenerativeBeliefMDP(pomdp, s.updater)    
     while true
         b = initialstate(mdp).val
         for k in 1:s.n
