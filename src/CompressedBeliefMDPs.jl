@@ -1,8 +1,5 @@
 module CompressedBeliefMDPs
 
-using Infiltrator
-# TODO: remove plots, revise, Infiltrator
-
 # Packages from JuliaPOMDPs
 using POMDPs
 using POMDPTools

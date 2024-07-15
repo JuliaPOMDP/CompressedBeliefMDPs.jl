@@ -1,6 +1,3 @@
-using Revise
-using Infiltrator
-
 using Plots
 using Random
 using MultivariateStats
