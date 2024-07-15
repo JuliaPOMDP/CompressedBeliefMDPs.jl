@@ -143,6 +143,18 @@ The generality of the base solver in CompressedBeliefMDPs.jl offers a major impr
 
 [^1]: The value function is no longer guaranteed to be convex over the compressed belief space $\tilde{B}$.
 
+# Circular Maze
+
+CompressedBeliefMDPs.jl also includes the Circular Maze POMDP from @Roy. 
+
+```julia
+using CompressedBeliefMDPs
+
+n_corridors = 2
+corridor_length = 100
+pomdp = CircularMaze(n_corridors, corridor_length)
+```
+
 # Acknowledgments
 
 We thank Arec Jamgochian, Robert Moss, Dylan Asmar, and Zachary Sunberg for their invaluable guidance.

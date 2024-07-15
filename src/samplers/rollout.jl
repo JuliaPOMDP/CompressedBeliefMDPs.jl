@@ -8,6 +8,8 @@ Samples belief states by rolling out a `Policy`.
 - `updater::Updater`: The updater used for updating beliefs.
 - `n::Integer`: The maximum number of simulated steps.
 - `rng::AbstractRNG`: The random number generator used for sampling.
+- `verbose::Bool`: Whether to use a progress bar while sampling.
+
 
 ## Constructors
     PolicySampler(pomdp::POMDP; policy::Policy=RandomPolicy(pomdp), 
@@ -33,6 +35,7 @@ struct PolicySampler <: Sampler
     updater::Updater
     n::Integer
     rng::AbstractRNG
+    verbose::Bool
 end
 
 function PolicySampler(
@@ -40,21 +43,25 @@ function PolicySampler(
     policy::Policy=RandomPolicy(pomdp), 
     updater::Updater=DiscreteUpdater(pomdp), 
     n=10,
-    rng::AbstractRNG=Random.GLOBAL_RNG
+    rng::AbstractRNG=Random.GLOBAL_RNG,
+    verbose::Bool=false
 )
-    PolicySampler(policy, updater, n, rng)
+    PolicySampler(policy, updater, n, rng, verbose)
 end
 
 
 function (s::PolicySampler)(pomdp::POMDP)
     B = []
     mdp = GenerativeBeliefMDP(pomdp, s.updater)
-    progress = Progress(s.n, 1)  # Initialize the progress bar
-
+    if s.verbose
+        progress = Progress(s.n)
+    end
+    i = 0
     while true
         b = initialstate(mdp).val
         for _ in 1:s.n
-            if length(B) == s.n
+            i += 1
+            if i == s.n
                 return unique!(B)
             end
             a = action(s.policy, b)
@@ -63,7 +70,9 @@ function (s::PolicySampler)(pomdp::POMDP)
             end
             b = @gen(:sp)(mdp, b, a, s.rng)
             push!(B, b)
-            next!(progress)  # Update the progress bar
+            if s.verbose
+                next!(progress)
+            end
         end
     end
     return B
@@ -73,12 +82,15 @@ end
 function (s::PolicySampler)(pomdp::CircularMaze)
     B = []
     mdp = GenerativeBeliefMDP(pomdp, s.updater) 
-    progress = Progress(s.n, 1)  # Initialize the progress bar
-
+    if s.verbose
+        progress = Progress(s.n)
+    end
+    i = 0
     while true
         b = initialstate(mdp).val
         for _ in 1:s.n
-            if length(B) == s.n
+            i += 1
+            if i == s.n
                 return unique!(B)
             end
             a = action(s.policy, b)
@@ -88,7 +100,9 @@ function (s::PolicySampler)(pomdp::CircularMaze)
                 break
             else
                 push!(B, b)
-                next!(progress)  # Update the progress bar
+                if s.verbose
+                    next!(progress)
+                end
             end
         end
     end
@@ -111,6 +125,7 @@ Samples belief states by rolling out an `ExplorationPolicy`. Essentially identic
 - `updater::Updater`: The updater used for updating beliefs.
 - `n::Integer`: The maximum number of simulated steps.
 - `rng::AbstractRNG`: The random number generator used for sampling.
+- `verbose::Bool`: Whether to use a progress bar while sampling.
 
 ## Constructors
     ExplorationPolicySampler(pomdp::POMDP; rng::AbstractRNG=Random.GLOBAL_RNG,
@@ -140,6 +155,7 @@ struct ExplorationPolicySampler <: Sampler
     updater::Updater
     n::Integer
     rng::AbstractRNG
+    verbose::Bool
 end
 
 function ExplorationPolicySampler(pomdp::POMDP; 
@@ -147,10 +163,11 @@ function ExplorationPolicySampler(pomdp::POMDP;
     explorer::ExplorationPolicy=EpsGreedyPolicy(pomdp, 0.1; rng=rng),
     on_policy=RandomPolicy(pomdp),
     updater::Updater=DiscreteUpdater(pomdp), 
-    n=10, 
+    n=10,
+    verbose=false
 )
     @assert n > 0 "n must be a positive integer"
-    sampler = ExplorationPolicySampler(explorer, on_policy, updater, n, rng)
+    sampler = ExplorationPolicySampler(explorer, on_policy, updater, n, rng, verbose)
     return sampler
 end
 
@@ -158,11 +175,16 @@ end
 
 function (s::ExplorationPolicySampler)(pomdp::POMDP)
     B = []
-    mdp = GenerativeBeliefMDP(pomdp, s.updater)    
+    mdp = GenerativeBeliefMDP(pomdp, s.updater)
+    if s.verbose
+        progress = Progress(s.n)
+    end
+    i = 0
     while true
         b = initialstate(mdp).val
         for k in 1:s.n
-            if length(B) == s.n
+            i += 1
+            if i == s.n
                 return unique!(B)
             end
             a = action(s.explorer, s.on_policy, k, b)
@@ -171,6 +193,9 @@ function (s::ExplorationPolicySampler)(pomdp::POMDP)
             end
             b = @gen(:sp)(mdp, b, a, s.rng)
             push!(B, b)
+            if s.verbose
+                next!(progress)
+            end
         end
     end
     return B
@@ -180,10 +205,15 @@ end
 function (s::ExplorationPolicySampler)(pomdp::CircularMaze)
     B = []
     mdp = GenerativeBeliefMDP(pomdp, s.updater)
+    if s.verbose
+        progress = Progress(s.n)
+    end
+    i = 0
     while true
         b = initialstate(mdp).val
         for k in 1:s.n
-            if length(B) == s.n
+            i += 1
+            if i == s.n
                 return unique!(B)
             end
             a = action(s.explorer, s.on_policy, k, b)
@@ -193,6 +223,9 @@ function (s::ExplorationPolicySampler)(pomdp::CircularMaze)
                 break
             else
                 push!(B, b)
+                if s.verbose
+                    next!(progress)
+                end
             end
         end
     end

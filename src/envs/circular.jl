@@ -1,8 +1,44 @@
+"""
+    CircularMazeState(corridor::Integer, x::Integer)
+
+The `CircularMazeState` struct represents the state of an agent in a circular maze.
+
+# Fields
+- `corridor::Integer`: The corridor number. The value ranges from 1 to `n_corridors`.
+- `x::Integer`: The position of the state within the corridor. The value ranges from 1 to the `corridor_length`.
+"""
 struct CircularMazeState
     corridor::Integer  # corridor number ∈ [1, ..., n_corridors]
     x::Integer  # position in corridor ∈ [1, ..., corridor_length]
 end
 
+"""
+    CircularMaze(n_corridors::Integer, corridor_length::Integer, discount::Float64, r_findgoal::Float64, r_timestep_penalty::Float64)
+    CircularMaze(n_corridors::Integer, corridor_length::Integer; kwargs...)
+    CircularMaze()
+        
+    
+A Partially Observable Markov Decision Process (POMDP) representing a circular maze environment.
+
+# Fields
+- `n_corridors::Integer`: Number of corridors in the circular maze.
+- `corridor_length::Integer`: Length of each corridor.
+- `probabilities::AbstractArray`: Probability masses for creating von Mises distributions.
+- `center::Integer`: The central position in the maze.
+- `discount::Float64`: Discount factor for future rewards.
+- `r_findgoal::Float64`: Reward for finding the goal.
+- `r_timestep_penalty::Float64`: Penalty for each timestep taken.
+- `states::AbstractArray`: Array of all possible states in the maze.
+- `goals::AbstractArray`: Array of goal states in the maze.
+
+# Example
+```julia
+using CompressedBeliefMDPs
+
+n_corridors = 8
+corridor_length = 25
+maze = CircularMaze(n_corridors, corridor_length)
+"""
 struct CircularMaze <: POMDP{
     Union{CircularMazeState, TerminalState}, 
     Integer, 
@@ -220,9 +256,11 @@ function POMDPs.observation(::CircularMaze, s::TerminalState)
 end
 
 function POMDPs.observations(pomdp::CircularMaze)
-    corridors = 1:pomdp.n_corridors
-    space = IterTools.chain(states(pomdp), corridors)
-    return space
+    states = pomdp.states
+    corridors = collect(1:pomdp.n_corridors)
+    O = vcat(states, corridors)
+    O = convert(Vector{Union{CircularMazeState, TerminalState, Integer}}, O)
+    return O
 end
 
 # TODO: maybe implement POMDPs.obsindex
@@ -254,7 +292,7 @@ function POMDPs.transition(
         corridor = s.corridor
         states = pomdp.states
         start = (corridor - 1) * pomdp.corridor_length + 1
-        stop = start + pomdp.corridor_length
+        stop = start + pomdp.corridor_length - 1
         corridor_states = states[start:stop]
         probabilities = _center_probabilities(pomdp, x)
         d = SparseCat(corridor_states, probabilities)

@@ -15,13 +15,16 @@
     # test CompressedBeliefSolver
     @testset "Samplers" begin
         @testset "PolicySampler" begin
-            @test_nowarn test_solver(CompressedBeliefSolver(pomdp; sampler=PolicySampler(pomdp)), pomdp)
+            sampler = PolicySampler(pomdp)
+            @test_nowarn test_solver(CompressedBeliefSolver(pomdp; sampler=sampler), pomdp)
         end
         @testset "ExplorationPolicySampler" begin
-            @test_nowarn test_solver(CompressedBeliefSolver(pomdp; sampler=ExplorationPolicySampler(pomdp)), pomdp)
+            sampler = ExplorationPolicySampler(pomdp)
+            @test_nowarn test_solver(CompressedBeliefSolver(pomdp; sampler=sampler), pomdp)
         end
         @testset "BeliefExpansionSampler" begin
-            @test_nowarn test_solver(CompressedBeliefSolver(pomdp; sampler=BeliefExpansionSampler(pomdp)), pomdp)
+            sampler = BeliefExpansionSampler(pomdp)
+            @test_nowarn test_solver(CompressedBeliefSolver(pomdp; sampler=sampler), pomdp)
         end
     end
    

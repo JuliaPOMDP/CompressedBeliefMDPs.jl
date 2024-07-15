@@ -16,8 +16,6 @@ using Distributions
 using Bijections
 using NearestNeighbors
 using StaticArrays
-using Combinatorics
-using IterTools
 using Plots
 using ProgressMeter
 
