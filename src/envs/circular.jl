@@ -340,9 +340,22 @@ function POMDPs.discount(pomdp::CircularMaze)
     return disc
 end
 
+# NOTE: deprecated
 ## hack to avoid exploring terminal states
+# CMAZE_TERMINAL_FLAG = false
+# function POMDPTools.ModelTools.gbmdp_handle_terminal(::CircularMaze, ::Updater, b, s, a, rng)
+#     global CMAZE_TERMINAL_FLAG = true
+#     return b
+# end
+
 CMAZE_TERMINAL_FLAG = false
-function POMDPTools.ModelTools.gbmdp_handle_terminal(::CircularMaze, ::Updater, b, s, a, rng)
+function terminal_behavior(b, s, a, rng)
     global CMAZE_TERMINAL_FLAG = true
     return b
 end
+
+function POMDPTools.ModelTools.GenerativeBeliefMDP(pomdp::CircularMaze, updater::Updater)
+    bmdp = GenerativeBeliefMDP(pomdp, updater; terminal_behavior=terminal_behavior)
+    return bmdp
+end
+

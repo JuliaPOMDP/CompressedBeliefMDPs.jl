@@ -65,9 +65,10 @@ function (s::PolicySampler)(pomdp::POMDP)
                 return unique!(B)
             end
             a = action(s.policy, b)
-            if isterminal(mdp.pomdp, rand(s.rng, b))
-                break
-            end
+            # NOTE: backwards compatible
+            # if isterminal(mdp.pomdp, rand(s.rng, b))
+            #     break
+            # end
             b = @gen(:sp)(mdp, b, a, s.rng)
             push!(B, b)
             if s.verbose
@@ -188,9 +189,10 @@ function (s::ExplorationPolicySampler)(pomdp::POMDP)
                 return unique!(B)
             end
             a = action(s.explorer, s.on_policy, k, b)
-            if isterminal(mdp.pomdp, rand(s.rng, b))
-                break
-            end
+            # NOTE: backwards compatible
+            # if isterminal(mdp.pomdp, rand(s.rng, b))
+            #     break
+            # end
             b = @gen(:sp)(mdp, b, a, s.rng)
             push!(B, b)
             if s.verbose
