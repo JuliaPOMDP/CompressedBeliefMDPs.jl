@@ -25,19 +25,19 @@ bibliography: paper.bib
 
 # Summary
 
-A standard mathematical framework for specifying a sequential decision problem with state and outcome uncertainty is the partially observable Markov decision process (POMDP) [@AFDM], with applications spanning medicine [@drugs], sustainability [@carbon], and aerospace [@planes]. Unfortunately, solving real-world POMDPs with traditional methods is often computationally intractable [@complexity1; @complexity2]. Belief compression [@Roy] is a powerful technique that can overcome this limitation that is particularly potent when state uncertainty is sparse or concentrated. By finding an efficient belief representation, we can focus on planning over the most relevant belief-states to find policies for much larger POMDPs than would otherwise be possible.
+Partially observable Markov decision processes (POMDPs) are a standard mathematical model for sequential decision making under state and outcome uncertainty [@AFDM]. They commonly feature in reinforcement learning research and have applications spanning medicine [@drugs], sustainability [@carbon], and aerospace [@planes]. Unfortunately, real-world POMDPs often require bespoke solutions since they are too large to be tractable with traditional methods [@complexity1; @complexity2]. Belief compression [@Roy] is a general-purpose technique that focuses planning on relevant belief states, thereby making it feasible to solve complex, real-world POMDPs more efficiently.
 
 # Statement of Need
 
 ## Research Purpose
 
-CompressedBeliefMDPs.jl is a Julia package [@Julia] for solving large POMDPs in the POMDPs.jl ecosystem [@POMDPs.jl] with belief compression. It offers an easily-extensible interface for sampling and compressing POMDP beliefs, and for constructing and solving compressed belief-state MDPs. CompressedBeliefMDPs.jl can be used in its own right to find approximate solutions to large POMDPs. It can also be used to benchmark the effectiveness of various sampling, compressing, and solving techniques.
+CompressedBeliefMDPs.jl is a Julia package [@Julia] for solving large POMDPs in the POMDPs.jl ecosystem [@POMDPs.jl] with belief compression. It offers a simple interface for effeciently sampling and compressing beliefs and for constructing and solving belief-state MDPs. The package can be used to solve complex POMDPs. It can also be used to benchmark sampling, compressing (dimensionality reduction), and solving techniques.
 
 ## Relation to Prior Work
 
 ### Other Methods for Solving Large POMDPs
 
-While traditional tabular methods like policy and value iteration scale poorly on real-world POMDPs, there are many modern techniques that are effective at solving large-scale POMDPs like point-based methods [@PBVI; @perseus; @hsvi; @SARSOP] and online planners [@AEMS; @despot; @mcts; @pomcp; @sunberg2018online]. Belief compression can be an effective but often overlooked technique that allows for generalization across the belief space when planning. One of the primary goals of CompressedBeliefMDPs.jl is to make benchmarking and exploring belief compression easier, so that it can be studied further.
+While traditional tabular methods like policy and value iteration scale poorly on real-world POMDPs, there are many modern techniques that are effective at solving large-scale POMDPs like point-based methods [@PBVI; @perseus; @hsvi; @SARSOP] and online planners [@AEMS; @despot; @mcts; @pomcp; @sunberg2018online]. Belief compression is an effective but often overlooked technique that finds an effecient belief representation during planning. One of the primary goals of CompressedBeliefMDPs.jl is to make benchmarking and exploring belief compression easier, so that it can be studied further.
 
 ### Belief Compression
 
@@ -145,7 +145,7 @@ The generality of the base solver in CompressedBeliefMDPs.jl offers a major impr
 
 # Circular Maze
 
-CompressedBeliefMDPs.jl also includes the Circular Maze POMDP from @Roy. 
+CompressedBeliefMDPs.jl also includes the Circular Maze POMDP from @Roy and scripts to recreate figures from the original paper. More details can be found in the [documentation](https://juliapomdp.github.io/CompressedBeliefMDPs.jl/dev/).
 
 ```julia
 using CompressedBeliefMDPs
@@ -157,6 +157,6 @@ pomdp = CircularMaze(n_corridors, corridor_length)
 
 # Acknowledgments
 
-We thank Arec Jamgochian, Robert Moss, Dylan Asmar, and Zachary Sunberg for their invaluable guidance.
+We thank Arec Jamgochian, Robert Moss, Dylan Asmar, and Zachary Sunberg for their help and guidance.
 
 # References

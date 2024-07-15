@@ -16,6 +16,7 @@ makedocs(
         "CompressedBeliefMDPs.jl" => "index.md",
         "Samplers" => "samplers.md",
         "Compressors" => "compressors.md",
+        "Environments" => "circular.md",
         "API Documentation" => "api.md"
     ]
 )
