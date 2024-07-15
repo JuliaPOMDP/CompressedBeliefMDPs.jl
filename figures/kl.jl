@@ -4,6 +4,8 @@ using Infiltrator
 using Plots
 using Random
 using MultivariateStats
+using Statistics
+using Distances
 
 using POMDPs
 using POMDPTools
@@ -11,48 +13,64 @@ using CompressedBeliefMDPs
 
 Random.seed!(1)
 
-pomdp = CircularMaze(5, 100)
-# pomdp = TMaze()
-sampler = PolicySampler(pomdp, n=500)
-compressor = PCACompressor(10)
-
-# get beliefs
-B = sampler(pomdp)
-
-# get compressed beliefs
-B_numerical = mapreduce(b->convert_s(AbstractArray{Float64}, b, pomdp), hcat, B)' |> Matrix
-B_numerical = B_numerical[:,1:end-1]  # ignore belief in TerminalState 
-fit!(compressor, B_numerical)
-B̃ = compressor(B_numerical)
-B_recon = reconstruct(compressor.M, B̃')'
-
-# TODO: add comparison to our reconstruction
-
-function plot_beliefs(original, reconstructed)
-    # Define x-axis (assuming the states are ordered sequentially)
-    x = 1:length(original)
-    
-    # Plot the beliefs
-    plot(x, original, label="Original Belief", linestyle=:solid, linewidth=2)
-    plot!(x, reconstructed, label="Reconstructed Belief", linestyle=:dash, linewidth=2)
-    
-    # Add labels and title
-    xlabel!("State")
-    ylabel!("Probability")
-    title!("An Example Belief and Reconstruction")
+function is_terminal_belief(row)
+    return all(x -> x == 0, row[1:end-1]) && row[end] == 1
 end
 
-# Loop through indices and save each plot in a folder
-plots_dir = "plots"
-if !isdir(plots_dir)
-    mkdir(plots_dir)
+function normalize_rows(M)
+    normalized = clamp.(M, 0, 1)
+    row_sums = sum(normalized, dims=2)
+    normalized = normalized ./ row_sums
+    return normalized
 end
 
-@show size(compressor.M)
-
-for i in 1:size(B_numerical, 1)
-    original = B_numerical[i, :]
-    reconstructed = B_recon[i, :]
-    plot_beliefs(original, reconstructed)
-    savefig(joinpath(plots_dir, "belief_plot_$i.png"))
+function calculate_kl_divergence(X, Y)
+    X = normalize_rows(X)
+    Y = normalize_rows(Y)
+    kl = colwise(KLDivergence(), X', Y')
+    return kl
 end
+
+function plot_kl_divergence(mean_kl, std_kl, max_bases)
+    errorbar = plot(
+        max_bases, mean_kl, 
+        yerr=std_kl, 
+        label="Mean KL Divergence", 
+        marker=:x, 
+        line=:dash
+    )
+    xlabel!("Maximum Number of Bases")
+    ylabel!("Average KL Divergence")
+    title!("Average KL Divergence vs. Maximum Number of Bases")
+    display(errorbar)
+    savefig(errorbar, "average_kl_divergence_vs_max_bases.png")
+end
+
+function main()
+    pomdp = CircularMaze(8, 25)
+    sampler = PolicySampler(pomdp, n=500)
+    B = sampler(pomdp)
+
+    means = []
+    stds = []
+
+    for maxoutdim in 1:30
+        compressor = PCACompressor(maxoutdim)
+        B_numerical = mapreduce(b->convert_s(AbstractArray{Float64}, b, pomdp), hcat, B)' |> Matrix
+        B_numerical = filter(row -> !is_terminal_belief(row), eachrow(B_numerical))  # exclude belief in terminal state
+        B_numerical = reduce(hcat, B_numerical)'
+        B_numerical = B_numerical[:, 1:end - 1]
+        fit!(compressor, B_numerical)
+        B̃ = compressor(B_numerical)
+        B_recon = reconstruct(compressor.M, B̃')'
+        kl = calculate_kl_divergence(B_numerical, B_recon)
+        mean_kl = mean(kl)
+        std_kl = std(kl)
+        push!(means, mean_kl)
+        push!(stds, std_kl)
+    end
+
+    plot_kl_divergence(means, stds, 1:30)
+end
+
+main()
