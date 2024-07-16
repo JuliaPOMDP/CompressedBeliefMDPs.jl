@@ -4,7 +4,7 @@
 
 This environment is a generalization of the Circular Maze POMDP described in [Finding Approximate POMDP solutions Through Belief Compression](https://arxiv.org/abs/1107.0053).[^1] The world consists of `n_corridor` 1D circular corridors that each have `corridor_length` states. The robot spawns in a random corridor. It must determine which corridor its in, navigate to the proper goal state, and finally declare that it has finished.
 
-![](../assets/maze.png)
+![](./assets/maze.png)
 
 <center>*Figure from [Finding Approximate POMDP solutions Through Belief Compression](https://arxiv.org/abs/1107.0053).</center>
 
@@ -37,7 +37,7 @@ The goal is to navigate to the correct goal state for the given corridor and the
 
 The initial state is sampled from a repeated, discrete von Mises distribution each with a concentration at the center of the hallway. 
 
-![](../assets/initial_belief.png)
+![](./assets/initial_belief.png)
 
 ## Episode End
 
