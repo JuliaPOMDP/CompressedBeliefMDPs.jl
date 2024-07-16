@@ -17,8 +17,7 @@ end
     CircularMaze(n_corridors::Integer, corridor_length::Integer; kwargs...)
     CircularMaze()
         
-    
-A Partially Observable Markov Decision Process (POMDP) representing a circular maze environment.
+A POMDP representing a circular maze environment.
 
 # Fields
 - `n_corridors::Integer`: Number of corridors in the circular maze.
