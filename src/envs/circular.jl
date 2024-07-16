@@ -37,6 +37,7 @@ using CompressedBeliefMDPs
 n_corridors = 8
 corridor_length = 25
 maze = CircularMaze(n_corridors, corridor_length)
+```
 """
 struct CircularMaze <: POMDP{
     Union{CircularMazeState, TerminalState}, 
