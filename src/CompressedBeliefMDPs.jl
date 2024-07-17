@@ -67,6 +67,10 @@ export
 include("cbmdp.jl")
 
 export
+    # utilities
+    make_cache,
+    make_numerical,
+    # workhorses
     CompressedBeliefSolver,
     CompressedBeliefPolicy,
     solve

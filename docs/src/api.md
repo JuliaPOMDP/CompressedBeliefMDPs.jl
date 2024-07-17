@@ -30,5 +30,7 @@ CompressedBeliefSolver
 
 ```@docs
 fit!
+make_cache
+make_numerical
 ```
 
