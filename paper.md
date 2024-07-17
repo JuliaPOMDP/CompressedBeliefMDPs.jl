@@ -22,49 +22,32 @@ affiliations:
 date: 13 April 2024
 bibliography: paper.bib
 header-includes: |
-    \usepackage{listings}
+  \usepackage[T1]{fontenc}
+  \usepackage{beramono}
+  \usepackage{listings}
+  \usepackage[usenames,dvipsnames]{xcolor}
 ---
-\lstdefinelanguage{Julia}{
-    keywords=[3]{initialize!, transition!, evaluate!, distance, isevent, isterminal, environment},
-    keywords=[2]{Nothing, Tuple, Real, Bool, Simulation, BlackBox, GrayBox, Sampleable, Environment},
-    keywords=[1]{function, abstract, type, end},
-    sensitive=true,
-    morecomment=[l]{\#},
-    morecomment=[n]{\#=}{=\#},
-    morestring=[s]{"}{"},
-    morestring=[m]{'}{'},
-    alsoletter=!?,
-    literate={,}{{\color[HTML]{0F6FA3},}}1
-             {\{}{{\color[HTML]{0F6FA3}\{}}1
-             {\}}{{\color[HTML]{0F6FA3}\}}}1
-}
+<!-- Julia definition (c) 2014 Jubobs; Julia code coloring snippet from https://tex.stackexchange.com/a/212794 -->
+\lstdefinelanguage{Julia}%
+  {morekeywords={abstract,break,case,catch,const,continue,do,else,elseif,%
+      end,export,false,for,function,immutable,import,importall,if,in,%
+      macro,module,otherwise,quote,return,switch,true,try,type,typealias,%
+      using,while},%
+   sensitive=true,%
+   alsoother={$},%
+   morecomment=[l]\#,%
+   morecomment=[n]{\#=}{=\#},%
+   morestring=[s]{"}{"},%
+   morestring=[m]{'}{'},%
+}[keywords,comments,strings]%
 
-\lstset{
+\lstset{%
     language         = Julia,
-    backgroundcolor  = \color[HTML]{F2F2F2},
-    basicstyle       = \small\ttfamily\color[HTML]{19177C},
-    numberstyle      = \ttfamily\scriptsize\color[HTML]{7F7F7F},
-    keywordstyle     = [1]{\bfseries\color[HTML]{1BA1EA}},
-    keywordstyle     = [2]{\color[HTML]{0F6FA3}},
-    keywordstyle     = [3]{\color[HTML]{0000FF}},
-    stringstyle      = \color[HTML]{F5615C},
-    commentstyle     = \color[HTML]{AAAAAA},
-    rulecolor        = \color[HTML]{000000},
-    frame=lines,
-    xleftmargin=10pt,
-    framexleftmargin=10pt,
-    framextopmargin=4pt,
-    framexbottommargin=4pt,
-    tabsize=4,
-    captionpos=b,
-    breaklines=true,
-    breakatwhitespace=false,
-    showstringspaces=false,
-    showspaces=false,
-    showtabs=false,
-    columns=fullflexible,
-    keepspaces=true,
-    numbers=none,
+    basicstyle       = \ttfamily,
+    keywordstyle     = \bfseries\color{blue},
+    stringstyle      = \color{magenta},
+    commentstyle     = \color{ForestGreen},
+    showstringspaces = false,
 }
 
 # Summary
