@@ -75,7 +75,7 @@ Partially observable Markov decision processes (POMDPs) are a standard mathemati
 
 ## Research Purpose
 
-CompressedBeliefMDPs.jl is a Julia package [@Julia] for solving large POMDPs in the POMDPs.jl ecosystem [@POMDPs.jl] with belief compression. It offers a simple interface for effeciently sampling and compressing beliefs and for constructing and solving belief-state MDPs. The package can be used to benchmark techniques for sampling, compressing (dimensionality reduction), and planning. It can also
+[CompressedBeliefMDPs.jl](https://github.com/JuliaPOMDP/CompressedBeliefMDPs.jl) is a Julia package [@Julia] for solving large POMDPs in the POMDPs.jl ecosystem [@POMDPs.jl] with belief compression. It offers a simple interface for effeciently sampling and compressing beliefs and for constructing and solving belief-state MDPs. The package can be used to benchmark techniques for sampling, compressing (dimensionality reduction), and planning. It can also
 solve complex POMDPs to support applications in a variety of domains. 
 
 ## Relation to Prior Work
@@ -135,30 +135,19 @@ We define the corresponding *compressed belief-state MDP* as $\langle \tilde{B},
 ## Implementation
 
 <!-- Deal w/ phi rendering -->
-We implement compressed belief MDPs with the `CompressedBeliefMDP` struct. `CompressedBeliefMDP` contains a [`GenerativeBeliefMDP`](https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/model/#POMDPTools.ModelTools.GenerativeBeliefMDP), a `Compressor`, and a cache `ϕ` that recovers the original belief. The default constructor handles the `GenerativeBeliefMDP` and `ϕ` creation. `CompressedBeliefMDP`s can be also be constructed with a POMDPs.jl `POMDP`, `Updater`, and CompressedBeliefMDPs.jl `Compressor`.
+We implement compressed belief MDPs with the `CompressedBeliefMDP` struct. `CompressedBeliefMDP` contains a [`GenerativeBeliefMDP`](https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/model/#POMDPTools.ModelTools.GenerativeBeliefMDP), a `Compressor`, and a cache $\phi$ that recovers the original belief. The default constructor handles the `GenerativeBeliefMDP` and cache creation. 
+
+`CompressedBeliefMDP`s can be also be constructed with a POMDPs.jl `POMDP`, `Updater`, and CompressedBeliefMDPs.jl `Compressor`.
 
 ```julia
 using POMDPs, POMDPModels, POMDPTools
 using CompressedBeliefMDPs
 
 pomdp = BabyPOMDP()
+sampler = nothing
+updater = DiscreteUpdater(pomdp)
 compressor = PCACompressor(1)
-sampler = BeliefExpansionSampler(pomdp)
-
-# sample beliefs
-B = sampler(pomdp)
-
-# compress beliefs and cache mapping
-B_numerical = make_numerical(B, pomdp)
-fit!(compressor, B_numerical)
-B̃ = compressor(B_numerical)
-ϕ = make_cache(B, B̃)
-
-# construct the compressed belief-state MDP
-m = CompressedBeliefMDP(pomdp, updater, compressor)
-merge!(m.ϕ, ϕ)  # update the compression cache
-
-cbmdp = CompressedBeliefMDP(pomdp, DiscreteUpdater(pomdp), compressor)
+cbmdp = CompressedBeliefMDP(pomdp, sampler, updater, compressor)
 ```
 
 # Solvers

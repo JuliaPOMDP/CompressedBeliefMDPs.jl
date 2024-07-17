@@ -67,10 +67,12 @@ export
 include("cbmdp.jl")
 
 export
-    # utilities
     make_cache,
     make_numerical,
-    # workhorses
+    compress_POMDP
+include("utils.jl")
+
+export
     CompressedBeliefSolver,
     CompressedBeliefPolicy,
     solve

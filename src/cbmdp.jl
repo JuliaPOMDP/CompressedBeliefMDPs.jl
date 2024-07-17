@@ -15,8 +15,13 @@ The `CompressedBeliefMDP` struct is a generalization of the compressed belief-st
 
 ## Constructors
     CompressedBeliefMDP(pomdp::POMDP, updater::Updater, compressor::Compressor)
+    CompressedBeliefMDP(pomdp::POMDP, sampler::Sampler, updater::Updater, compressor::Compressor)
 
 Constructs a `CompressedBeliefMDP` using the specified POMDP, updater, and compressor.
+
+!!! warning 
+    The 4-argument constructor is a quality-of-life constructor that calls
+    [`fit!`](@ref) on the given compressor. 
 
 ## Example Usage
 
@@ -38,7 +43,6 @@ struct CompressedBeliefMDP{B, A} <: MDP{B, A}
     ϕ::Bijection  # ϕ: belief ↦ compressor(belief); NOTE: While compressions aren't usually injective, we cache compressed beliefs on a first-come, first-served basis, so the *cache* is effectively bijective.
 end
 
-
 function CompressedBeliefMDP(
     pomdp::POMDP, 
     updater::Updater, 
@@ -52,6 +56,16 @@ function CompressedBeliefMDP(
     B̃ = typeof(b̃)
     ϕ = Bijection{B, B̃}()
     return CompressedBeliefMDP{B̃, actiontype(bmdp)}(bmdp, compressor, ϕ)
+end
+
+function CompressedBeliefMDP(
+    pomdp::POMDP, 
+    sampler::Sampler, 
+    updater::Updater, 
+    compressor::Compressor
+)
+    m, _ = compress_POMDP(pomdp, sampler, updater, compressor)
+    return m
 end
 
 

@@ -32,5 +32,6 @@ CompressedBeliefSolver
 fit!
 make_cache
 make_numerical
+compress_POMDP
 ```
 
