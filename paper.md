@@ -21,34 +21,7 @@ affiliations:
    index: 1
 date: 13 April 2024
 bibliography: paper.bib
-header-includes: |
-  \usepackage[T1]{fontenc}
-  \usepackage{beramono}
-  \usepackage{listings}
-  \usepackage[usenames,dvipsnames]{xcolor}
 ---
-<!-- Julia definition (c) 2014 Jubobs; Julia code coloring snippet from https://tex.stackexchange.com/a/212794 -->
-\lstdefinelanguage{Julia}%
-  {morekeywords={abstract,break,case,catch,const,continue,do,else,elseif,%
-      end,export,false,for,function,immutable,import,importall,if,in,%
-      macro,module,otherwise,quote,return,switch,true,try,type,typealias,%
-      using,while},%
-   sensitive=true,%
-   alsoother={$},%
-   morecomment=[l]\#,%
-   morecomment=[n]{\#=}{=\#},%
-   morestring=[s]{"}{"},%
-   morestring=[m]{'}{'},%
-}[keywords,comments,strings]%
-
-\lstset{%
-    language         = Julia,
-    basicstyle       = \ttfamily,
-    keywordstyle     = \bfseries\color{blue},
-    stringstyle      = \color{magenta},
-    commentstyle     = \color{ForestGreen},
-    showstringspaces = false,
-}
 
 # Summary
 
@@ -118,7 +91,7 @@ We define the corresponding *compressed belief-state MDP* as $\langle \tilde{B},
 
 We implement compressed belief MDPs with the `CompressedBeliefMDP` struct. `CompressedBeliefMDP` contains a [`GenerativeBeliefMDP`](https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/model/#POMDPTools.ModelTools.GenerativeBeliefMDP), a `Compressor`, and a cache $\phi$ that recovers the original belief. The default constructor handles belief sampling, compressor fitting, belief compressing, and cache management.
 
-\begin{lstlisting}
+```julia
 using POMDPs, POMDPModels, POMDPTools
 using CompressedBeliefMDPs
 
@@ -127,20 +100,20 @@ sampler = BeliefExpansionSampler(pomdp)
 updater = DiscreteUpdater(pomdp)
 compressor = PCACompressor(1)
 cbmdp = CompressedBeliefMDP(pomdp, sampler, updater, compressor)
-\end{lstlisting}
+```
 
 # Solvers
 
 `CompressedBeliefMDP` can be solved by any POMDPs.jl MDP solver.
 
-\begin{lstlisting}
+```julia
 solver = MyMDPSolver()::POMDPs.Solver
 policy = solve(solver, cbmdp)
-\end{lstlisting}
+```
 
 For convenience, we also provide `CompressedBeliefSolver` and `CompressedBeliefPolicy` which wrap the entire belief compression pipeline including sampling beliefs and fitting the compressor.
 
-\begin{lstlisting}
+```julia
 using POMDPs, POMDPModels, POMDPTools
 using CompressedBeliefMDPs
 
@@ -157,18 +130,18 @@ policy = POMDPs.solve(solver, pomdp)  # CompressedBeliefPolicy
 s = initialstate(pomdp)
 v = value(policy, s)
 a = action(policy, s)
-\end{lstlisting}
+```
 
 Following @Roy, we use local value approximation as our default base solver because it provides an error bound on our value estimate [@error_bound].
 
-\begin{lstlisting}
+```julia
 using POMDPs, POMDPTools, POMDPModels
 using CompressedBeliefMDPs
 
 pomdp = BabyPOMDP()
 solver = CompressedBeliefSolver(pomdp)
 policy = solve(solver, pomdp)
-\end{lstlisting}
+```
 
 The generality of the base solver in CompressedBeliefMDPs.jl offers a major improvement over the belief compression of @Roy because it supports continuous state, action, and observation spaces. More details, examples, and instructions on implementing custom components can be found in the [documentation](https://juliapomdp.github.io/CompressedBeliefMDPs.jl/dev/).
 
