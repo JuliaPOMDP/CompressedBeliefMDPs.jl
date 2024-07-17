@@ -135,16 +135,17 @@ We define the corresponding *compressed belief-state MDP* as $\langle \tilde{B},
 ## Implementation
 
 <!-- Deal w/ phi rendering -->
-We implement compressed belief MDPs with the `CompressedBeliefMDP` struct. `CompressedBeliefMDP` contains a [`GenerativeBeliefMDP`](https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/model/#POMDPTools.ModelTools.GenerativeBeliefMDP), a `Compressor`, and a cache $\phi$ that recovers the original belief. The default constructor handles the `GenerativeBeliefMDP` and cache creation. 
+We implement compressed belief MDPs with the `CompressedBeliefMDP` struct. 
 
-`CompressedBeliefMDP`s can be also be constructed with a POMDPs.jl `POMDP`, `Updater`, and CompressedBeliefMDPs.jl `Compressor`.
+
+`CompressedBeliefMDP` contains a [`GenerativeBeliefMDP`](https://juliapomdp.github.io/POMDPs.jl/latest/POMDPTools/model/#POMDPTools.ModelTools.GenerativeBeliefMDP), a `Compressor`, and a cache $\phi$ that recovers the original belief. The default constructor handles belief sampling, belief compressing, and cache creation.
 
 ```julia
 using POMDPs, POMDPModels, POMDPTools
 using CompressedBeliefMDPs
 
 pomdp = BabyPOMDP()
-sampler = nothing
+sampler = BeliefExpansionSampler(pomdp)
 updater = DiscreteUpdater(pomdp)
 compressor = PCACompressor(1)
 cbmdp = CompressedBeliefMDP(pomdp, sampler, updater, compressor)
