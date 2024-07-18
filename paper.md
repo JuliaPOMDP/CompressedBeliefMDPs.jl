@@ -43,7 +43,7 @@ CompressedBeliefMDPs.jl is a modular generalization of the original algorithm. I
 
 ### Belief Compression
 
-CompressedBeliefMDPs.jl abstracts the belief compression algorithm of @Roy into four steps: sampling, compression, construction, and planning. The `Sampler` abstract type handles belief sampling; the `Compressor` abstract type handles belief compression; the `CompressedBeliefMDP` struct handles constructing the compressed belief MDP; and the `CompressedBeliefSolver` and `CompressedBeliefPolicy` structs handle planning in the compressed belief MDP. 
+CompressedBeliefMDPs.jl abstracts the belief compression algorithm of @Roy into four steps: sampling, compression, construction, and planning. The `Sampler` abstract type handles belief sampling; the `Compressor` abstract type handles belief compression; the `CompressedBeliefMDP` struct handles constructing the compressed belief-state MDP; and the `CompressedBeliefSolver` and `CompressedBeliefPolicy` structs handle planning in the compressed belief-state MDP. 
 
 Our framework is a generalization of the original belief compression algorithm. @Roy uses a heuristic controller for sampling beliefs; exponential family principal component analysis with Poisson loss for compression [@EPCA]; and local approximation value iteration for the base solver. CompressedBeliefMDPs.jl, on the other hand, is a modular framework, meaning that belief compression can be applied with *any* combination of sampler, compressor, and MDP solver.
 
