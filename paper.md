@@ -135,7 +135,6 @@ policy = solve(solver, pomdp)
 
 To solve a continuous-space POMDP, simply swap the base solver. More details, examples, and instructions on implementing custom components can be found in the [documentation](https://juliapomdp.github.io/CompressedBeliefMDPs.jl/dev/).
 
-
 # Circular Maze
 
 CompressedBeliefMDPs.jl also includes the Circular Maze POMDP from @Roy and scripts to recreate figures from the original paper. Additional details can be found in the [documentation](https://juliapomdp.github.io/CompressedBeliefMDPs.jl/dev/).
