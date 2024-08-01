@@ -6,7 +6,7 @@ This environment is a generalization of the Circular Maze POMDP described in [Fi
 
 ![](./assets/maze.png)
 
-*Figure from [Finding Approximate POMDP solutions Through Belief Compression](https://arxiv.org/abs/1107.0053).
+Figure from [Finding Approximate POMDP solutions Through Belief Compression](https://arxiv.org/abs/1107.0053).
 
 [^1]: Roy doesn't actually name his toy environment. For the original environment details, see the "PCA Performance" subsection on page 8.
 
