@@ -13,11 +13,11 @@ using Distributions
 using Bijections
 using NearestNeighbors
 using StaticArrays
-using Plots
-using ProgressMeter
+# using Plots
+# using ProgressMeter
 
 using LinearAlgebra
-using Parameters
+# using Parameters
 using Random
 
 
