@@ -3,6 +3,7 @@
 [![Build Status](https://github.com/JuliaPOMDP/CompressedBeliefMDPs.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/JuliaPOMDP/CompressedBeliefMDPs.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Dev-Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaPOMDP.github.io/CompressedBeliefMDPs.jl/dev/)
 [![codecov](https://codecov.io/gh/JuliaPOMDP/CompressedBeliefMDPs.jl/graph/badge.svg?token=FXmEi9Fscd)](https://codecov.io/gh/JuliaPOMDP/CompressedBeliefMDPs.jl)
+[![status](https://joss.theoj.org/papers/967acf3a5b70351313a995c12e03849b/status.svg)](https://joss.theoj.org/papers/967acf3a5b70351313a995c12e03849b)
 
 ## Introduction
 
