@@ -64,31 +64,6 @@ rs = RolloutSimulator(max_steps=50)
 r = simulate(rs, pomdp, policy)
 ```
 
-### Continuous Example
-
-This example demonstrates using CompressedBeliefMDP in a continuous setting with the `LightDark1D` POMDP. It combines particle filters for belief updating and Monte Carlo Tree Search (MCTS) as the solver. While compressing a 1D space is trivial toy problem, this architecture can be easily scaled to larger POMDPs with continuous state and action spaces.
-
-```julia
-using POMDPs, POMDPModels, POMDPTools
-using ParticleFilters
-using MCTS
-using CompressedBeliefMDPs
-
-pomdp = LightDark1D()
-pomdp.movement_cost = 1
-base_solver = MCTSSolver(n_iterations=10, depth=50, exploration_constant=5.0)
-updater = BootstrapFilter(pomdp, 100)
-solver = CompressedBeliefSolver(
-    pomdp,
-    base_solver;
-    updater=updater,
-    sampler=PolicySampler(pomdp; updater=updater)
-)
-policy = solve(solver, pomdp)
-rs = RolloutSimulator(max_steps=50)
-r = simulate(rs, pomdp, policy)
-```
-
 > **Note:** We use MCTS here as a proof of concept that CompressedBeliefMDPs can handle continuous state and action spaces. In reality, belief compression has no effect on MCTS with double progressive widening. If you want to solve continuous POMDPs, we suggest implementing a custom solver or looking into [Crux.jl](https://www.google.com/search?q=crux.jl&oq=cru&gs_lcrp=EgZjaHJvbWUqDggAEEUYJxg7GIAEGIoFMg4IABBFGCcYOxiABBiKBTIGCAEQRRhAMgYIAhBFGDkyDAgDEAAYQxiABBiKBTIGCAQQRRg8MgYIBRBFGDwyBggGEEUYPDIGCAcQRRhB0gEHNzY1ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8).
 
 
@@ -127,4 +102,6 @@ Each step is handled by `Sampler`, `Compressor`, `CompressedBeliefMDP`, and `Com
 
 For more details, please see the rest of the documentation or the associated paper.
 
+## Contribution Guidelines
 
+We welcome contributions from anyone! See the [contributing guidlines](https://github.com/JuliaPOMDP/POMDPs.jl/blob/a14d1f3d2e1f551e154803064bc9496a0df4ba3e/CONTRIBUTING.md) for the [POMDPs.jl](https://juliapomdp.github.io/POMDPs.jl/latest/) community for more information.
