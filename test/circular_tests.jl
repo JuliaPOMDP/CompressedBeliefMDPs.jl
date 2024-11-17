@@ -11,7 +11,6 @@
     #     end
     # end
 
-
     # test CompressedBeliefSolver
     @testset "Samplers" begin
         @testset "PolicySampler" begin
@@ -28,9 +27,6 @@
         end
     end
    
-
-    # TODO: test simulations, RNG, rewards for non goal states
-
     @testset "Transition/Reward Tests" begin
         for s in pomdp.goals
             @test reward(pomdp, s, CMAZE_LEFT) == 0
