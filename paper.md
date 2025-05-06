@@ -49,7 +49,7 @@ Our framework is a generalization of the original belief compression algorithm. 
 
 ### Related Packages
 
-To our knowledge, no prior Julia or Python package implements POMDP belief compression. A similar package exists for MATLAB [@epca-MATLAB], but it focuses on Poisson exponential family principal component analysis and not general belief compression.
+To our knowledge, no prior Julia or Python package implements POMDP belief compression. There are, however, two packages that implement exponential family principal component analysis (EPCA): one in MATLAB [@epca-MATLAB] for Poisson EPCA; the other in Julia for general EPCA [@Bhamidipaty2025]. The later API is explicitly designed to be compatible with CompressedBeliefMDPs.jl and may be used to reimplement the original belief compression algorithm in @Roy.
  
 # Sampling
 
