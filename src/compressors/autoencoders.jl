@@ -21,7 +21,7 @@ end
 function fit!(c::AutoencoderCompressor, beliefs)
     opt_state = Flux.setup(c.optimizer, c.model)
     data = [(beliefs', beliefs')]
-    loss(m, x, y) = Flux.kldivergence(m(x), y)
+    loss(m, x, y) = Flux.kldivergence(m(x) .+ eps(), y .+ eps())
     for _ in 1:c.epochs
         Flux.train!(loss, c.model, data, opt_state)
     end
