@@ -21,7 +21,7 @@ function (c::MySampler)(pomdp::POMDP)
 end
 ```
 
-## Implemented Sampler
+## Implemented Samplers
 
 CompressedBeliefMDPs provides the following generic belief samplers:
 - an exploratory belief expansion sampler

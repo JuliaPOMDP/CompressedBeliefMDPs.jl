@@ -4,14 +4,16 @@ using Distances
 """
     BeliefExpansionSampler
 
-Fast extension of exploratory belief expansion (Algorithm 21.13 in [Algorithms for Decision Making](https://algorithmsbook.com/)) that uses
-``k``-d trees.
+An implementation of exploratory belief expansion (Algorithm 21.13 in [Algorithms for Decision Making](https://algorithmsbook.com/)) that uses
+``k``-d trees to compute the furthest reachable belief.
 
 ## Fields
 - `updater::Updater`: The updater used to update beliefs.
-- `metric::NearestNeighbors.MinkowskiMetric`: The metric used to measure distances between beliefs.
-It must be a [Minkowski metric](https://en.wikipedia.org/wiki/Minkowski_distance).
+- `metric::NearestNeighbors.MinkowskiMetric`: The metric used to measure distances between beliefs. It must be a [Minkowski metric](https://en.wikipedia.org/wiki/Minkowski_distance).
 - `n::Integer`: The number of belief expansions to perform.
+
+!!! warning "Performance Warning"
+    Belief expansion can be computationally expensive. To reduce runtime cost, consider using a smaller number of expansions `n` or random policy sampler (i.e., default `PolicySampler`).
 
 ## Constructors
     BeliefExpansionSampler(pomdp::POMDP; updater::Updater=DiscreteUpdater(pomdp),
