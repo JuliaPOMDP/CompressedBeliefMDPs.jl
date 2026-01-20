@@ -92,3 +92,19 @@ rs = RolloutSimulator(max_steps=50)
 r = simulate(rs, pomdp, policy)
 ```
 
+## Citing CompressedBeliefMDPs
+If CompressedBeliefMDPs is useful in your research and you would like to acknowledge it, please cite this [paper](https://joss.theoj.org/papers/10.21105/joss.07346#):
+```bibtex
+@article{Bhamidipaty2025,
+  doi       = {10.21105/joss.07346},
+  url       = {https://doi.org/10.21105/joss.07346},
+  year      = {2025},
+  publisher = {The Open Journal},
+  volume    = {10},
+  number    = {110},
+  pages     = {7346},
+  author    = {Bhamidipaty, Logan Mondal and Kochenderfer, Mykel J.},
+  title     = {{CompressedBeliefMDPs.jl}: A {Julia} Package for Solving Large {POMDPs} with Belief Compression},
+  journal   = {Journal of Open Source Software}
+}
+```
